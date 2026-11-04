@@ -172,3 +172,17 @@ def test_manual_link_moves_activity(client, db_session):
     response = client.post(f"/api/plans/sessions/{friday.id}/link", json={"activity_id": run.id})
     assert response.json()["activity_id"] == run.id
     assert sessions_on(db_session, MON)[0].activity_id is None
+
+
+def test_neighbor_day_match_rejects_wildly_different_distance(db_session):
+    import_plan(db_session, plan_yaml("A", MON), today=MON)
+    marathon = make_activity(db_session, _at(date(2026, 1, 4), 9), distance_m=42500)
+    match_activity(db_session, marathon)
+    assert sessions_on(db_session, MON)[0].activity_id is None
+
+
+def test_same_day_match_ignores_distance(db_session):
+    import_plan(db_session, plan_yaml("A", MON), today=MON)
+    long_one = make_activity(db_session, _at(MON), distance_m=30000)
+    match_activity(db_session, long_one)
+    assert sessions_on(db_session, MON)[0].activity_id == long_one.id

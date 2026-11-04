@@ -10,10 +10,27 @@ from app.plans.models import PlanSession
 from app.plans.service import sessions_on
 from app.time import local_date, local_range
 
+NEIGHBOR_DISTANCE_RATIO = (0.5, 2.0)
 
-def _free_session(db: Session, day: date) -> PlanSession | None:
-    """First unmatched planned session on a day (plan in effect)."""
-    return next((s for s in sessions_on(db, day) if s.activity_id is None), None)
+
+def _plausible(session: PlanSession, activity: Activity) -> bool:
+    """For a run on a neighbouring day, distance must be roughly what was planned."""
+    if not session.distance_km or not activity.distance_m:
+        return True
+    ratio = activity.distance_m / (session.distance_km * 1000)
+    return NEIGHBOR_DISTANCE_RATIO[0] <= ratio <= NEIGHBOR_DISTANCE_RATIO[1]
+
+
+def _free_session(db: Session, day: date, activity: Activity | None = None) -> PlanSession | None:
+    """First unmatched planned session on a day; with `activity`, only plausible ones."""
+    return next(
+        (
+            s
+            for s in sessions_on(db, day)
+            if s.activity_id is None and (activity is None or _plausible(s, activity))
+        ),
+        None,
+    )
 
 
 def match_activity(db: Session, activity: Activity) -> PlanSession | None:
@@ -23,8 +40,9 @@ def match_activity(db: Session, activity: Activity) -> PlanSession | None:
     if db.scalar(select(PlanSession.id).where(PlanSession.activity_id == activity.id)):
         return None
     day = local_date(activity.started_at)
-    for candidate in (day, day - timedelta(days=1), day + timedelta(days=1)):
-        session = _free_session(db, candidate)
+    for offset in (0, -1, 1):
+        candidate = day + timedelta(days=offset)
+        session = _free_session(db, candidate, activity if offset else None)
         if session is not None:
             session.activity_id = activity.id
             db.flush()
