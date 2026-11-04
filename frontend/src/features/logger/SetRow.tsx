@@ -45,9 +45,7 @@ export default function SetRow(props: {
   const prev = row.previous ? setLabel(row.previous.weightKg, row.previous.reps, row.previous.seconds) : '–'
   return (
     <div className={`set-row${row.done ? ' done' : ''}${row.isWarmup ? ' warmup' : ''}`}>
-      <button className="set-label" onClick={props.onRemove} title="Remove set">
-        {props.label}
-      </button>
+      <span className="set-label">{props.label}</span>
       <span className="set-prev muted">{prev}</span>
       <span className={`set-sugg ${row.suggestion ? KIND_CLASS[row.suggestion.kind] : 'muted'}`}>
         {row.suggestion
@@ -62,6 +60,9 @@ export default function SetRow(props: {
       )}
       <button className={`set-done${row.done ? ' on' : ''}`} onClick={props.onToggle} aria-label="Done">
         ✓
+      </button>
+      <button className="set-remove" onClick={props.onRemove} aria-label="Remove set">
+        ✕
       </button>
     </div>
   )

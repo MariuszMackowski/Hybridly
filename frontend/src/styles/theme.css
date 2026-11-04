@@ -103,13 +103,14 @@ table.sets th { color: var(--muted); font-weight: 500; font-size: 12px; }
 .target { font-size: 13px; white-space: nowrap; }
 .set-row {
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1fr) 64px 56px 44px;
-  gap: 6px; align-items: center; padding: 3px 2px; border-radius: 8px;
+  grid-template-columns: 24px minmax(0, 1fr) minmax(0, 1fr) 60px 48px 44px 28px;
+  gap: 4px; align-items: center; padding: 3px 2px; border-radius: 8px;
 }
 .set-head { font-size: 11px; padding-top: 0; padding-bottom: 0; }
 .set-row.done { background: var(--accent-soft); }
 .set-row.warmup .set-label { color: var(--muted); }
-.set-label { min-height: 36px; padding: 0; border: none; background: none; font-weight: 600; }
+.set-label { font-weight: 600; text-align: center; }
+.set-remove { min-height: 40px; padding: 0; border: none; background: none; color: var(--muted); font-size: 15px; }
 .set-prev, .set-sugg { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .set-input { min-height: 40px; padding: 0 6px; text-align: center; }
 .set-done { min-height: 40px; padding: 0; font-size: 18px; }

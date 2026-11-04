@@ -50,6 +50,7 @@ export default function ExerciseCard(props: { group: DraftExercise[]; actions: C
         <span>kg</span>
         <span>{group[0].measure === 'time' ? 's' : 'reps'}</span>
         <span />
+        <span />
       </div>
       {lines(group).map(({ ex, index, row, label }) => (
         <SetRow
@@ -59,7 +60,7 @@ export default function ExerciseCard(props: { group: DraftExercise[]; actions: C
           measure={ex.measure}
           onChange={(patch) => actions.onChange(ex.key, index, patch)}
           onToggle={() => actions.onToggle(ex.key, index)}
-          onRemove={() => window.confirm('Remove this set?') && actions.onRemoveSet(ex.key, index)}
+          onRemove={() => (!row.done || window.confirm('Remove this logged set?')) && actions.onRemoveSet(ex.key, index)}
         />
       ))}
       {group.map((ex) => (
