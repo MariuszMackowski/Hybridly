@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.db import get_db
@@ -6,6 +6,7 @@ from app.exercises import service
 from app.exercises.models import Exercise
 from app.exercises.schemas import ExerciseIn, ExerciseOut
 from app.muscles import Muscle
+from app.progression.context import ExerciseContext, build_context
 
 router = APIRouter(tags=["exercises"])
 
@@ -52,6 +53,19 @@ def update_exercise(exercise_id: int, data: ExerciseIn, db: Session = Depends(ge
         return service.update_exercise(db, exercise, data)
     except service.DuplicateExerciseError as error:
         raise _conflict(error) from error
+
+
+@router.get("/exercises/{exercise_id}/context", response_model=ExerciseContext)
+def exercise_context(
+    exercise_id: int,
+    sets: int = Query(3, ge=1, le=20),
+    rep_min: int = Query(8, ge=1, le=100),
+    rep_max: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """Previous session and suggestions for the workout logger."""
+    exercise = get_exercise_or_404(db, exercise_id)
+    return build_context(db, exercise, sets, rep_min, max(rep_min, rep_max))
 
 
 @router.post("/exercises/{exercise_id}/archive", response_model=ExerciseOut)
