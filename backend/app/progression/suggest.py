@@ -47,7 +47,10 @@ def suggest_sets(
     """Double progression: all sets at top of range -> add weight, else chase +1 rep."""
     if not previous:
         return []
-    if all(s.reps >= rep_max for s in previous):
+    if increment_kg <= 0 and all(s.reps >= rep_max for s in previous):
+        # No weight step (e.g. bodyweight core): progress by reps only.
+        result = [Suggestion(s.weight_kg, s.reps + 1, SuggestionKind.increase) for s in previous]
+    elif all(s.reps >= rep_max for s in previous):
         result = [
             Suggestion(s.weight_kg + increment_kg, rep_min, SuggestionKind.increase)
             for s in previous

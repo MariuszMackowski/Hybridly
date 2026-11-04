@@ -47,6 +47,11 @@ def test_more_target_sets_than_history_repeats_last():
     assert result[3] == result[2]
 
 
+def test_zero_increment_at_top_keeps_weight_and_adds_rep():
+    result = suggest_sets(_prev((0, 12)), [], sets=1, rep_min=8, rep_max=12, increment_kg=0)
+    assert result == _sug((0, 13, INC))
+
+
 def test_reduce_never_below_zero():
     result = suggest_sets(_prev((1, 1)), [], sets=1, rep_min=6, rep_max=8, increment_kg=2.5)
     assert result[0].weight_kg == 0

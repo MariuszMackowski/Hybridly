@@ -96,7 +96,8 @@ def mark_warmups(sets: list[GSet]) -> list[GSet]:
         return sets
     result, leading = [], True
     for s in sets:
-        leading = leading and (s.weight_kg or 0) <= WARMUP_RATIO * top
+        # Weight 0 is an unweighted bodyweight set (logged kg = added load), never a warm-up.
+        leading = leading and 0 < (s.weight_kg or 0) <= WARMUP_RATIO * top
         result.append(replace(s, is_warmup=leading))
     return result
 

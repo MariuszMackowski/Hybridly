@@ -71,6 +71,14 @@ def test_bodyweight_sets_never_warmup():
     assert not any(s.is_warmup for s in mark_warmups(sets))
 
 
+def test_unweighted_sets_before_weighted_are_not_warmups():
+    sets = [
+        GSet(0, i, "Pull-Up", w, r, None, None)
+        for i, (w, r) in enumerate([(0.0, 5), (0.0, 4), (0.0, 4), (5.0, 3)])
+    ]
+    assert not any(s.is_warmup for s in mark_warmups(sets))
+
+
 def test_parsed_workout_marks_warmups(parsed):
     bench = _workout(parsed, "2026-01-03 08:00:00+00:00").sets[:4]
     assert [s.is_warmup for s in bench] == [True, False, False, False]

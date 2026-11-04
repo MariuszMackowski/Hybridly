@@ -5,6 +5,7 @@ import {
   addExercise,
   addSet,
   displayOrder,
+  hasLoggedSets,
   removeExercise,
   removeSet,
   swapExercise,
@@ -73,7 +74,10 @@ export default function LoggerPage() {
     onToggle: (key, i) => update((d) => toggleDone(d, key, i)),
     onRemoveSet: (key, i) => update((d) => removeSet(d, key, i)),
     onAddSet: (key, warmup) => update((d) => addSet(d, key, warmup)),
-    onSwap: (exercise) => setPicker({ mode: 'swap', exercise }),
+    onSwap: (exercise) => {
+      if (hasLoggedSets(exercise) && !window.confirm(`Replacing ${exercise.name} discards its logged sets. Continue?`)) return
+      setPicker({ mode: 'swap', exercise })
+    },
     onRemove: (key) => update((d) => removeExercise(d, key)),
   }
 

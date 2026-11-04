@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.exercises.catalog import CATALOG
 from app.exercises.models import Exercise
 from app.exercises.schemas import ExerciseIn
+from app.workouts.stats import recompute_stats
 
 
 class DuplicateExerciseError(Exception):
@@ -62,7 +63,11 @@ def update_exercise(db: Session, exercise: Exercise, data: ExerciseIn) -> Exerci
         aliases.append(exercise.name)
     data = data.model_copy(update={"aliases": aliases})
     _ensure_names_free(db, [data.name, *data.aliases], exclude_id=exercise.id)
+    bodyweight_changed = exercise.is_bodyweight != data.is_bodyweight
     _apply(exercise, data)
+    if bodyweight_changed:
+        db.flush()
+        recompute_stats(db, {exercise.id})
     db.commit()
     return exercise
 

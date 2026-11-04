@@ -68,6 +68,17 @@ def test_warmup_set_has_null_e1rm_and_no_pr(db_session):
     assert _sets(second)[0].is_pr is False
 
 
+def test_toggling_bodyweight_flag_recomputes(client, db_session):
+    db_session.add(BodyweightEntry(day=date(2026, 9, 1), kg=80))
+    exercise = make_exercise(db_session, "Dip")
+    workout = make_workout(db_session, exercise, [(0, 8)])
+    recompute_stats(db_session)
+    body = {"name": "Dip", "primary_muscles": ["chest"], "is_bodyweight": True}
+    assert client.put(f"/api/exercises/{exercise.id}", json=body).status_code == 200
+    db_session.refresh(_sets(workout)[0])
+    assert float(_sets(workout)[0].e1rm_kg) == estimate_1rm(80, 8)
+
+
 def test_put_bodyweight_recomputes(client, db_session):
     exercise = make_exercise(db_session, "Pull-Up", is_bodyweight=True)
     workout = make_workout(db_session, exercise, [(0, 5)])

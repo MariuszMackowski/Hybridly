@@ -137,6 +137,9 @@ function mapRow(d: WorkoutDraft, key: string, index: number, fn: (row: DraftSet)
   return mapExercise(d, key, (ex) => ({ ...ex, rows: ex.rows.map((r, i) => (i === index ? fn(r) : r)) }))
 }
 
+/** Whether swapping/removing this card would discard sets the user already ticked. */
+export const hasLoggedSets = (ex: DraftExercise) => ex.rows.some((r) => r.done)
+
 export const swapExercise = (d: WorkoutDraft, key: string, ctx: ExerciseContext) =>
   mapExercise(d, key, (ex) => withContext(ex, ctx))
 

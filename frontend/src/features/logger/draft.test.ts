@@ -4,6 +4,7 @@ import {
   addSet,
   createDraft,
   displayOrder,
+  hasLoggedSets,
   swapExercise,
   toggleDone,
   toPayload,
@@ -86,6 +87,13 @@ describe('draft', () => {
     expect(swapped.exercises[0].name).toBe('Barbell Row')
     expect(swapped.exercises[0].rows[0].weightKg).toBe(52.5)
     expect(swapped.exercises[0].sets).toBe(2)
+  })
+
+  it('hasLoggedSets is true only when a row is done', () => {
+    let d = createDraft(template([slot(1, 'Bench Press')]), { 1: ctx(bench) }, NOW, 'c1')
+    expect(hasLoggedSets(d.exercises[0])).toBe(false)
+    d = toggleDone(d, d.exercises[0].key, 0)
+    expect(hasLoggedSets(d.exercises[0])).toBe(true)
   })
 
   it('addSet copies last row values not done', () => {
