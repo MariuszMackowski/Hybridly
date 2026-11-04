@@ -48,8 +48,16 @@ Sync runs in the Celery worker: once whenever the stack starts and on **Sync now
 
 - **Plan** tab → *Instructions for your AI coach*: copy the format description, send it to the coach, then import the YAML it returns (file or paste). CLI: `python -m app.cli import-plan /data/seed/<plan>.yaml`.
 - A newer plan takes over from `max(its first week, today)`; earlier days keep the plan that was active then. Runs are matched to planned sessions automatically (same day, otherwise ±1 day if the distance is plausible) and compared: distance, pace vs. range, time in HR zone, interval laps.
-- **Today** shows the planned run, week progress, coach notes, COROS recovery, the strength template (with a cutback/taper hint) and the day's home routines.
-- Home routines: add YouTube links to the library, group them into routines (alternatives — doing one counts), assign to weekdays, tick them off on Today.
+- **Today** shows the planned run, week progress, coach notes, the strength template (with a cutback/taper hint) and the recovery view.
+- **Routines** tab: today's checklist on top; below, add YouTube links to the library, group them into routines (alternatives — doing one counts) and assign them to weekdays.
+- Exercises, templates and the weekday template plan live under **Settings → Training setup**.
+
+## Load & recovery
+
+- One recovery % for gym and running together (COROS's own % shown alongside). Run load is the COROS training load; strength sets are scaled to the same range by set intensity (set e1RM vs. best e1RM of that exercise), unilateral sets count twice, warm-ups not at all.
+- Fatigue decays exponentially (36 h overall, 48 h per muscle); capacity is 3 × the mean daily load of the last 42 days (min. 120). Constants: `backend/app/load/model.py`.
+- Muscle map (front/back, white → red) with the most fatigued muscles listed; **Show all** expands to the full breakdown. **Load chart** opens the last 14 days of gym vs. cardio load.
+- The logger stops suggesting weight increases (holds the weight, marked 💤) while overall recovery is below 40 % or a primary muscle of the exercise is ≥ 70 % fatigued.
 
 ## Development
 
