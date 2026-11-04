@@ -13,9 +13,9 @@ START = datetime(2026, 1, 10, 8, 0, tzinfo=UTC)
 _SPORTS = {"running": Sport.RUNNING, "walking": Sport.WALKING, "basketball": Sport.BASKETBALL}
 
 
-def _ms(seconds: float) -> int:
-    """Epoch milliseconds for an offset from START."""
-    return int((START.timestamp() + seconds) * 1000)
+def _ms(seconds: float, start: datetime = START) -> int:
+    """Epoch milliseconds for an offset from start."""
+    return int((start.timestamp() + seconds) * 1000)
 
 
 def make_fit(
@@ -25,6 +25,7 @@ def make_fit(
     with_gps: bool = True,
     with_hr: bool = True,
     speed: float = 3.0,
+    start: datetime = START,
 ) -> bytes:
     """1 Hz records at constant speed, equal laps, one session."""
     builder = FitFileBuilder(auto_define=True, min_string_size=50)
@@ -32,13 +33,13 @@ def make_fit(
     file_id.type = FileType.ACTIVITY
     file_id.manufacturer = Manufacturer.DEVELOPMENT.value
     file_id.product = 0
-    file_id.time_created = _ms(0)
+    file_id.time_created = _ms(0, start)
     file_id.serial_number = 1
     builder.add(file_id)
 
     for t in range(seconds + 1):
         rec = RecordMessage()
-        rec.timestamp = _ms(t)
+        rec.timestamp = _ms(t, start)
         rec.distance = speed * t
         rec.speed = speed
         rec.altitude = 10.0 + (t % 20)
@@ -53,8 +54,8 @@ def make_fit(
     lap_len = seconds // laps
     for i in range(laps):
         lap = LapMessage()
-        lap.start_time = _ms(i * lap_len)
-        lap.timestamp = _ms((i + 1) * lap_len)
+        lap.start_time = _ms(i * lap_len, start)
+        lap.timestamp = _ms((i + 1) * lap_len, start)
         lap.total_elapsed_time = lap_len
         lap.total_timer_time = lap_len
         lap.total_distance = speed * lap_len
@@ -66,8 +67,8 @@ def make_fit(
         builder.add(lap)
 
     session = SessionMessage()
-    session.start_time = _ms(0)
-    session.timestamp = _ms(seconds)
+    session.start_time = _ms(0, start)
+    session.timestamp = _ms(seconds, start)
     session.sport = _SPORTS[sport]
     session.total_elapsed_time = seconds
     session.total_timer_time = seconds

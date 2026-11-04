@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://hybridly:hybridly@db:5432/hybridly"
     test_database_url: str | None = None
     timezone: str = "Europe/Warsaw"
+    fit_dir: str = "/fit"
+    redis_url: str = "redis://redis:6379/0"
+    public_url: str | None = None
+    coros_server_url: str = "https://mcpeu.coros.com/mcp"
 
 
 @lru_cache
