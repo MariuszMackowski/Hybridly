@@ -156,3 +156,17 @@ summary { min-height: 32px; display: flex; align-items: center; gap: 6px; cursor
 .tabbar a { font-size: 12px; }
 .metric-chart { display: flex; flex-direction: column; }
 .metric-title { font-size: 12px; padding: 0 8px; }
+
+/* History calendar */
+.calendar { display: flex; flex-direction: column; gap: 8px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.cal-head { font-size: 11px; padding-bottom: 2px; }
+.cal-day { min-height: 42px; padding: 2px 0; border: 1px solid transparent; background: none; border-radius: 8px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 14px; }
+.cal-day.today { border-color: var(--line); }
+.cal-day.selected { border-color: var(--accent); background: var(--accent-soft); }
+.cal-dots { display: flex; gap: 2px; height: 6px; }
+.cal-dots i, .cal-legend i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+.cal-legend { gap: 12px; font-size: 11px; justify-content: center; }
+.week-header { padding: 10px 2px 0; border-top: 1px solid var(--line); margin-top: 4px; font-size: 14px; }
+.week-header .muted { font-size: 12px; }

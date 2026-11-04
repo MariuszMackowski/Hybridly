@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
@@ -97,11 +99,15 @@ def to_out(workout: Workout) -> WorkoutOut:
     )
 
 
-def list_summaries(db: Session, limit: int, offset: int) -> list[WorkoutSummary]:
-    """History page, newest first."""
+def list_summaries(
+    db: Session, limit: int, offset: int, between: tuple[datetime, datetime] | None = None
+) -> list[WorkoutSummary]:
+    """History page, newest first, optionally limited to a time range [start, end)."""
+    query = select(Workout)
+    if between:
+        query = query.where(Workout.started_at >= between[0], Workout.started_at < between[1])
     workouts = db.scalars(
-        select(Workout)
-        .order_by(Workout.started_at.desc())
+        query.order_by(Workout.started_at.desc())
         .limit(limit)
         .offset(offset)
         .options(

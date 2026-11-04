@@ -14,6 +14,15 @@ def local_today(now: datetime | None = None) -> date:
     return (now or utc_now()).astimezone(WARSAW).date()
 
 
+def local_range(first: date, last_exclusive: date) -> tuple[datetime, datetime]:
+    """UTC instants bounding Warsaw calendar days [first, last_exclusive)."""
+
+    def start(d: date) -> datetime:
+        return datetime(d.year, d.month, d.day, tzinfo=WARSAW).astimezone(UTC)
+
+    return start(first), start(last_exclusive)
+
+
 def local_date(moment: datetime) -> date:
     """Return the Europe/Warsaw calendar date of a timestamp."""
     return moment.astimezone(WARSAW).date()

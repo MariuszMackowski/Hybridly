@@ -170,11 +170,19 @@ export const useCorosComplete = () =>
 export const useCorosSync = () =>
   useInvalidatingMutation(() => apiSend<{ status: string }>('POST', '/coros/sync'), [['coros']])
 
-export const useHistory = (kind: HistoryKind) =>
+export const useHistory = (kind: HistoryKind, day: string | null = null) =>
   useInfiniteQuery({
-    queryKey: ['history', kind],
+    queryKey: ['history', kind, day],
     initialPageParam: 0,
     queryFn: ({ pageParam }) =>
-      apiGet<HistoryItem[]>(`/history?kind=${kind}&limit=${PAGE_SIZE}&offset=${pageParam}`),
+      apiGet<HistoryItem[]>(
+        `/history?kind=${kind}&limit=${PAGE_SIZE}&offset=${pageParam}${day ? `&day=${day}` : ''}`,
+      ),
     getNextPageParam: (last, pages) => (last.length < PAGE_SIZE ? undefined : pages.length * PAGE_SIZE),
+  })
+
+export const useCalendar = (month: string) =>
+  useQuery({
+    queryKey: ['history', 'calendar', month],
+    queryFn: () => apiGet<{ day: string; kinds: string[] }[]>(`/history/calendar?month=${month}`),
   })

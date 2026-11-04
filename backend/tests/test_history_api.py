@@ -59,3 +59,26 @@ def test_history_pagination_across_sources(client, mixed):
     first = client.get("/api/history?limit=2&offset=0").json()
     second = client.get("/api/history?limit=2&offset=2").json()
     assert _days(first) + _days(second) == ["04", "03", "02", "01"]
+
+
+def test_calendar_marks_days_by_kind(client, mixed):
+    days = client.get("/api/history/calendar?month=2026-01").json()
+    assert days == [
+        {"day": "2026-01-01", "kinds": ["gym"]},
+        {"day": "2026-01-02", "kinds": ["run"]},
+        {"day": "2026-01-03", "kinds": ["gym"]},
+        {"day": "2026-01-04", "kinds": ["walk"]},
+    ]
+
+
+def test_calendar_uses_warsaw_date(client, db_session):
+    bench = make_exercise(db_session)
+    make_workout(db_session, bench, [(40, 8)], started_at=datetime(2026, 1, 31, 23, 30, tzinfo=UTC))
+    db_session.commit()
+    assert client.get("/api/history/calendar?month=2026-01").json() == []
+    assert client.get("/api/history/calendar?month=2026-02").json()[0]["day"] == "2026-02-01"
+
+
+def test_history_filtered_to_one_day(client, mixed):
+    items = client.get("/api/history?day=2026-01-03").json()
+    assert [(i["kind"], i["started_at"][:10]) for i in items] == [("workout", "2026-01-03")]
