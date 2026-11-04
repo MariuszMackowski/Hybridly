@@ -1,5 +1,6 @@
 from fastapi import APIRouter, FastAPI
 
+from app.activities.router import router as activities_router
 from app.bodyweight.router import router as bodyweight_router
 from app.exercises.router import router as exercises_router
 from app.templates.router import router as templates_router
@@ -27,6 +28,7 @@ def create_app() -> FastAPI:
         bodyweight_router,
         workouts_router,
         templates_router,
+        activities_router,
     ):
         app.include_router(router, prefix="/api")
     return app
