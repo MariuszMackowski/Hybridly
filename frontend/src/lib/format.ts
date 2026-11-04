@@ -21,3 +21,24 @@ export function dateTime(iso: string): string {
 export function durationMin(start: string, end: string | null): number | null {
   return end ? Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000) : null
 }
+
+/** "h:mm:ss" or "mm:ss" from seconds. */
+export function formatDuration(seconds: number): string {
+  const total = Math.round(seconds)
+  const h = Math.floor(total / 3600)
+  const mm = String(Math.floor((total % 3600) / 60)).padStart(2, '0')
+  const ss = String(total % 60).padStart(2, '0')
+  return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`
+}
+
+/** Pace "m:ss" (per km) from seconds per km. */
+export function formatPace(secondsPerKm: number | null): string {
+  if (secondsPerKm === null || !Number.isFinite(secondsPerKm)) return '–'
+  const total = Math.round(secondsPerKm)
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
+}
+
+/** Distance in km with two decimals. */
+export function formatDistance(meters: number | null): string {
+  return meters === null ? '–' : `${(meters / 1000).toFixed(2)} km`
+}

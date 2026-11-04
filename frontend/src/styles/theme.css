@@ -72,7 +72,7 @@ textarea { padding: 10px; min-height: 80px; }
 label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
 
 .tabbar {
-  position: fixed; left: 0; right: 0; bottom: 0;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000;
   display: flex; justify-content: space-around;
   background: rgba(15, 17, 21, 0.95);
   border-top: 1px solid var(--line);
@@ -122,14 +122,14 @@ table.sets th { color: var(--muted); font-weight: 500; font-size: 12px; }
 .check-item input { width: 22px; min-height: 22px; }
 summary { min-height: 32px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
 .save-bar {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000;
   padding: 10px 12px calc(env(safe-area-inset-bottom) + 10px);
   background: var(--bg); border-top: 1px solid var(--line);
 }
 .save-bar button { max-width: 696px; margin: 0 auto; display: block; }
 
 /* Bottom sheet */
-.sheet-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 20; display: flex; align-items: flex-end; }
+.sheet-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 1100; display: flex; align-items: flex-end; }
 .sheet {
   width: 100%; max-height: 80vh; background: var(--card); border-radius: 16px 16px 0 0;
   padding: 14px 12px calc(env(safe-area-inset-bottom) + 14px);
@@ -143,3 +143,14 @@ summary { min-height: 32px; display: flex; align-items: center; gap: 6px; cursor
 .rest-timer { text-align: center; font-size: 15px; color: var(--muted); padding-bottom: 8px; font-variant-numeric: tabular-nums; }
 .rest-timer strong { color: var(--accent); font-size: 20px; margin-left: 6px; }
 .logger { padding-bottom: calc(env(safe-area-inset-bottom) + 130px); }
+
+/* Runs */
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tile { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+.tile span { font-size: 11px; }
+.tile strong { font-size: 17px; }
+.chart-card { padding: 8px 4px; }
+.chart-legend { gap: 12px; font-size: 12px; padding: 0 8px 4px; }
+.map-card { padding: 4px; }
+.upload-results { font-size: 13px; }
+.tabbar a { font-size: 12px; }

@@ -132,3 +132,73 @@ export interface BodyweightEntry {
   day: string
   kg: number
 }
+
+export interface ActivitySummary {
+  id: number
+  source: 'coros' | 'upload'
+  sport: string
+  name: string | null
+  started_at: string
+  duration_s: number
+  distance_m: number | null
+  avg_hr: number | null
+  avg_speed: number | null
+  training_load: number | null
+  avg_pace_s_per_km: number | null
+}
+
+export interface ActivityLap {
+  index: number
+  start_offset_s: number
+  duration_s: number
+  distance_m: number | null
+  avg_hr: number | null
+  max_hr: number | null
+  avg_speed: number | null
+  avg_cadence_spm: number | null
+}
+
+export interface ActivityStreams {
+  t: number[]
+  hr?: (number | null)[]
+  speed?: (number | null)[]
+  alt?: (number | null)[]
+  lat?: (number | null)[]
+  lon?: (number | null)[]
+  cad?: (number | null)[]
+}
+
+export interface ActivityDetail extends ActivitySummary {
+  sport_type: number | null
+  external_id: string | null
+  max_hr: number | null
+  ascent_m: number | null
+  calories: number | null
+  avg_cadence_spm: number | null
+  aerobic_te: number | null
+  anaerobic_te: number | null
+  laps: ActivityLap[]
+  streams: ActivityStreams
+}
+
+export interface UploadResult {
+  filename: string
+  status: 'created' | 'duplicate' | 'error'
+  id: number | null
+  detail: string | null
+}
+
+export interface CorosStatus {
+  status: 'disconnected' | 'connected' | 'needs_reconnect'
+  syncing: boolean
+  last_sync_at: string | null
+  last_sync_status: {
+    imported?: number
+    skipped_existing?: number
+    skipped_strength?: number
+    deferred?: number
+    unparsable?: number
+    errors?: string[]
+  } | null
+  redirect_uri: string
+}

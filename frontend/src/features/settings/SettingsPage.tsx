@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useBodyweight, useSaveBodyweight, useToday } from '../../api/hooks'
 import { parseDecimal } from '../../lib/decimal'
 import { kg } from '../../lib/format'
+import CorosCard from './CorosCard'
 
 export default function SettingsPage() {
   const today = useToday().data?.date ?? new Date().toISOString().slice(0, 10)
@@ -10,10 +12,15 @@ export default function SettingsPage() {
   const [day, setDay] = useState<string | null>(null)
   const [value, setValue] = useState('')
   const parsed = parseDecimal(value)
+  const [params] = useSearchParams()
+  const corosError = params.get('coros_error')
 
   return (
     <div className="page stack">
       <h1>Settings</h1>
+      {params.get('coros') === 'connected' && <div className="card good">COROS connected — first sync started.</div>}
+      {corosError && <div className="banner">COROS: {corosError}</div>}
+      <CorosCard />
       <div className="card stack">
         <strong>Bodyweight</strong>
         <span className="muted">Used for bodyweight exercises (pull-ups: logged kg = added weight).</span>

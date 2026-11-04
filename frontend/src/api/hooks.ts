@@ -1,6 +1,10 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet, apiSend } from './client'
 import type {
+  ActivityDetail,
+  ActivitySummary,
+  CorosStatus,
+  UploadResult,
   BodyweightEntry,
   ExerciseContext,
   ExerciseIn,
@@ -121,3 +125,48 @@ export const useSaveBodyweight = () =>
     ({ day, kg }: { day: string; kg: number }) => apiSend<BodyweightEntry>('PUT', `/bodyweight/${day}`, { kg }),
     [['bodyweight'], ['workouts']],
   )
+
+export const useActivities = (sport: string | null) =>
+  useQuery({
+    queryKey: ['activities', sport],
+    queryFn: () => apiGet<ActivitySummary[]>(`/activities?limit=200${sport ? `&sport=${sport}` : ''}`),
+  })
+
+export const useActivity = (id: number) =>
+  useQuery({ queryKey: ['activities', 'detail', id], queryFn: () => apiGet<ActivityDetail>(`/activities/${id}`) })
+
+/** Multipart upload of FIT files (fetch directly: apiSend sends JSON). */
+export function useUploadFit() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: async (files: File[]) => {
+      const form = new FormData()
+      files.forEach((f) => form.append('files', f))
+      const response = await fetch('/api/activities/upload', { method: 'POST', body: form })
+      if (!response.ok) throw new Error(`Upload failed (${response.status})`)
+      return (await response.json()) as UploadResult[]
+    },
+    onSuccess: () => client.invalidateQueries({ queryKey: ['activities'] }),
+  })
+}
+
+export const useDeleteActivity = () =>
+  useInvalidatingMutation((id: number) => apiSend<void>('DELETE', `/activities/${id}`), [['activities']])
+
+export const useCorosStatus = () =>
+  useQuery({
+    queryKey: ['coros'],
+    queryFn: () => apiGet<CorosStatus>('/coros/status'),
+    refetchInterval: (q) => (q.state.data?.syncing ? 3000 : false),
+  })
+
+export const useCorosConnect = () =>
+  useMutation({ mutationFn: () => apiSend<{ authorize_url: string }>('POST', '/coros/connect') })
+
+export const useCorosComplete = () =>
+  useInvalidatingMutation((url: string) => apiSend<{ status: string }>('POST', '/coros/complete', { url }), [
+    ['coros'],
+  ])
+
+export const useCorosSync = () =>
+  useInvalidatingMutation(() => apiSend<{ status: string }>('POST', '/coros/sync'), [['coros']])
