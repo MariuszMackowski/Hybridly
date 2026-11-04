@@ -35,6 +35,15 @@ tailscale serve status            # shows https://<machine>.<tailnet>.ts.net
 
 On the iPhone (Tailscale app connected): open that URL in Safari → Share → **Add to Home Screen**. The app opens full-screen; a workout in progress is kept on the phone until **Save**.
 
+## COROS sync
+
+Settings → **Connect COROS** uses the official COROS MCP server (OAuth with dynamic client registration + PKCE; EU endpoint by default, `COROS_SERVER_URL` to change).
+
+- If the app is reachable over HTTPS (e.g. `tailscale serve`), set `PUBLIC_URL` in `.env` and COROS redirects straight back to `/api/coros/callback`.
+- Otherwise the login ends on a `http://localhost:8765/callback?code=…` error page: paste that address into the box in Settings.
+
+Sync runs in the Celery worker: once whenever the stack starts and on **Sync now**. It imports every non-strength activity (FIT file + COROS training load / TE) and stores the daily recovery and training-load snapshots. COROS allows 50 FIT downloads per day, so one run downloads at most 45; the rest follow on the next run. FIT files are kept in `data/fit/`. Runs can also be added by uploading `.fit` files on the Runs tab — the same activity from both sources is stored once.
+
 ## Development
 
 ```bash
