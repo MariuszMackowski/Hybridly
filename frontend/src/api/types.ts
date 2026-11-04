@@ -156,6 +156,8 @@ export interface ActivityLap {
   max_hr: number | null
   avg_speed: number | null
   avg_cadence_spm: number | null
+  avg_power_w: number | null
+  avg_stride_m: number | null
 }
 
 export interface ActivityStreams {
@@ -166,6 +168,11 @@ export interface ActivityStreams {
   lat?: (number | null)[]
   lon?: (number | null)[]
   cad?: (number | null)[]
+  stride?: (number | null)[]
+  power?: (number | null)[]
+  gct?: (number | null)[]
+  vo?: (number | null)[]
+  vr?: (number | null)[]
 }
 
 export interface ActivityDetail extends ActivitySummary {
@@ -175,6 +182,11 @@ export interface ActivityDetail extends ActivitySummary {
   ascent_m: number | null
   calories: number | null
   avg_cadence_spm: number | null
+  avg_stride_m: number | null
+  avg_power_w: number | null
+  avg_gct_ms: number | null
+  avg_vo_cm: number | null
+  avg_vr_pct: number | null
   aerobic_te: number | null
   anaerobic_te: number | null
   laps: ActivityLap[]

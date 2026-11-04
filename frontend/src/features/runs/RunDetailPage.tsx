@@ -44,6 +44,11 @@ export default function RunDetailPage() {
         <Tile label="Avg HR" value={a.avg_hr} />
         <Tile label="Max HR" value={a.max_hr} />
         <Tile label="Cadence" value={a.avg_cadence_spm} />
+        <Tile label="Stride" value={a.avg_stride_m !== null ? `${a.avg_stride_m.toFixed(2)} m` : null} />
+        <Tile label="Power" value={a.avg_power_w !== null ? `${a.avg_power_w} W` : null} />
+        <Tile label="GCT" value={a.avg_gct_ms !== null ? `${Math.round(a.avg_gct_ms)} ms` : null} />
+        <Tile label="Vert. osc." value={a.avg_vo_cm !== null ? `${a.avg_vo_cm.toFixed(1)} cm` : null} />
+        <Tile label="Vert. ratio" value={a.avg_vr_pct !== null ? `${a.avg_vr_pct.toFixed(1)} %` : null} />
         <Tile label="Ascent" value={a.ascent_m !== null ? `${Math.round(a.ascent_m)} m` : null} />
         <Tile label="Training load" value={a.training_load} />
         <Tile label="Aerobic TE" value={a.aerobic_te} />
@@ -62,6 +67,8 @@ export default function RunDetailPage() {
                 <th>Time</th>
                 <th>{isRun ? 'Pace' : 'km/h'}</th>
                 <th>HR</th>
+                <th>W</th>
+                <th>Stride</th>
               </tr>
             </thead>
             <tbody>
@@ -78,6 +85,8 @@ export default function RunDetailPage() {
                         : '–'}
                   </td>
                   <td>{lap.avg_hr ?? '–'}</td>
+                  <td>{lap.avg_power_w ?? '–'}</td>
+                  <td>{lap.avg_stride_m?.toFixed(2) ?? '–'}</td>
                 </tr>
               ))}
             </tbody>

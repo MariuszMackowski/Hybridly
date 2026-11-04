@@ -154,3 +154,5 @@ summary { min-height: 32px; display: flex; align-items: center; gap: 6px; cursor
 .map-card { padding: 4px; }
 .upload-results { font-size: 13px; }
 .tabbar a { font-size: 12px; }
+.metric-chart { display: flex; flex-direction: column; }
+.metric-title { font-size: 12px; padding: 0 8px; }
