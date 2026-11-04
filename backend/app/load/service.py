@@ -107,6 +107,11 @@ def _daily(events: list[tuple[Event, str]], first: date, days: int) -> dict[date
 @router.get("/recovery", response_model=RecoveryOut)
 def get_recovery(db: Session = Depends(get_db)):
     """Overall recovery %, muscle fatigue levels and recent daily load."""
+    return current_state(db)
+
+
+def current_state(db: Session) -> RecoveryOut:
+    """Recovery state right now."""
     now = utc_now()
     today = local_date(now)
     since = now - timedelta(days=WINDOW_DAYS)

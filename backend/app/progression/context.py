@@ -33,6 +33,38 @@ class SuggestionOut(BaseModel):
     weight_kg: float
     reps: int
     kind: SuggestionKind
+    reason: str | None = None  # "fatigued" when progression was held back
+
+
+FATIGUED_RECOVERY_PCT = 40
+FATIGUED_MUSCLE_LEVEL = 0.7
+
+
+def _hold_if_fatigued(db: Session, exercise: Exercise, suggestions, working) -> list[SuggestionOut]:
+    """Turn weight increases into holds while the body or the exercise's muscles are fatigued."""
+    from app.load.service import current_state  # local: load depends on workouts
+
+    out = [SuggestionOut(**vars(s)) for s in suggestions]
+    if not any(s.kind == SuggestionKind.increase for s in out) or not working:
+        return out
+    state = current_state(db)
+    tired = state.recovery_pct < FATIGUED_RECOVERY_PCT or any(
+        state.muscles.get(m, 0) >= FATIGUED_MUSCLE_LEVEL for m in exercise.primary_muscles
+    )
+    if not tired:
+        return out
+    held = []
+    for i, s in enumerate(out):
+        prev = working[min(i, len(working) - 1)]
+        if s.kind == SuggestionKind.increase:
+            s = SuggestionOut(
+                weight_kg=prev.weight_kg,
+                reps=prev.reps,
+                kind=SuggestionKind.hold,
+                reason="fatigued",
+            )
+        held.append(s)
+    return held
 
 
 class ExerciseContext(BaseModel):
@@ -106,5 +138,5 @@ def build_context(
     return ExerciseContext(
         exercise=ExerciseOut.model_validate(exercise),
         previous=previous,
-        suggestions=[SuggestionOut(**vars(s)) for s in suggestions],
+        suggestions=_hold_if_fatigued(db, exercise, suggestions, _working_sets(last)),
     )
