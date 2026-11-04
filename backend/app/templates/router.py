@@ -6,6 +6,7 @@ from app.templates import service
 from app.templates.models import WeeklyTemplate, WorkoutTemplate
 from app.templates.schemas import TemplateIn, TemplateOut, TodayOut, WeekItem
 from app.time import local_today, utc_now
+from app.today import TodayExtras, build_today
 
 router = APIRouter(tags=["templates"])
 
@@ -69,7 +70,11 @@ def put_week(items: list[WeekItem], db: Session = Depends(get_db)):
     return service.get_week(db)
 
 
-@router.get("/today", response_model=TodayOut)
+class TodayFull(TodayOut, TodayExtras):
+    """Today: strength template plus plan, routines and recovery."""
+
+
+@router.get("/today", response_model=TodayFull)
 def today(db: Session = Depends(get_db)):
     """Today's date (Europe/Warsaw) and the template planned for it."""
     day = local_today(utc_now())
@@ -78,4 +83,5 @@ def today(db: Session = Depends(get_db)):
     if row and row.template_id:
         loaded = service.get_template(db, row.template_id)
         template = service.to_out(db, loaded) if loaded else None
-    return TodayOut(date=day, weekday=day.weekday(), template=template)
+    extras = build_today(db, day)
+    return TodayFull(date=day, weekday=day.weekday(), template=template, **dict(extras))
