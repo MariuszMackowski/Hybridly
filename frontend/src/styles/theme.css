@@ -92,3 +92,46 @@ label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color:
 table.sets { width: 100%; border-collapse: collapse; font-size: 15px; }
 table.sets td, table.sets th { padding: 6px 4px; text-align: left; }
 table.sets th { color: var(--muted); font-weight: 500; font-size: 12px; }
+
+/* Logger */
+.logger { padding-bottom: calc(env(safe-area-inset-bottom) + 96px); }
+.logger-head { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 6px 0; }
+.logger-title { text-align: center; flex: 1; }
+.exercise-card { display: flex; flex-direction: column; gap: 4px; padding: 10px 8px; }
+.exercise-head { padding: 0 4px 4px; }
+.exercise-name { border: none; background: none; padding: 0; min-height: 36px; font-size: 17px; font-weight: 600; text-align: left; }
+.target { font-size: 13px; white-space: nowrap; }
+.set-row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1fr) 64px 56px 44px;
+  gap: 6px; align-items: center; padding: 3px 2px; border-radius: 8px;
+}
+.set-head { font-size: 11px; padding-top: 0; padding-bottom: 0; }
+.set-row.done { background: var(--accent-soft); }
+.set-row.warmup .set-label { color: var(--muted); }
+.set-label { min-height: 36px; padding: 0; border: none; background: none; font-weight: 600; }
+.set-prev, .set-sugg { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.set-input { min-height: 40px; padding: 0 6px; text-align: center; }
+.set-done { min-height: 40px; padding: 0; font-size: 18px; }
+.set-done.on { background: var(--accent); border-color: var(--accent); color: #111; }
+.card-actions { flex-wrap: wrap; padding-top: 6px; }
+.section-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+.checklist { padding-top: 8px; }
+.check-item { flex-direction: row; font-size: 15px; color: var(--text); }
+.check-item input { width: 22px; min-height: 22px; }
+summary { min-height: 32px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.save-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
+  padding: 10px 12px calc(env(safe-area-inset-bottom) + 10px);
+  background: rgba(15, 17, 21, 0.95); border-top: 1px solid var(--line);
+}
+.save-bar button { max-width: 696px; margin: 0 auto; display: block; }
+
+/* Bottom sheet */
+.sheet-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); z-index: 20; display: flex; align-items: flex-end; }
+.sheet {
+  width: 100%; max-height: 80vh; background: var(--card); border-radius: 16px 16px 0 0;
+  padding: 14px 12px calc(env(safe-area-inset-bottom) + 14px);
+}
+.sheet-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; max-height: 50vh; }
+.list-item { text-align: left; }

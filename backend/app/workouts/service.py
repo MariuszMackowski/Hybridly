@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.exercises.models import Exercise
@@ -31,9 +32,14 @@ def get_workout(db: Session, workout_id: int) -> Workout | None:
     return db.scalar(select(Workout).where(Workout.id == workout_id).options(*_load_options()))
 
 
+def _existing_id(db: Session, client_id) -> int | None:
+    """Id of a workout already saved with this client_id."""
+    return db.scalar(select(Workout.id).where(Workout.client_id == client_id))
+
+
 def create_workout(db: Session, data: WorkoutCreate) -> tuple[Workout, bool]:
     """Store a workout; an already-used client_id returns the existing one (created=False)."""
-    existing = db.scalar(select(Workout.id).where(Workout.client_id == data.client_id))
+    existing = _existing_id(db, data.client_id)
     if existing is not None:
         return get_workout(db, existing), False
     exercise_ids = {e.exercise_id for e in data.exercises}
@@ -50,8 +56,16 @@ def create_workout(db: Session, data: WorkoutCreate) -> tuple[Workout, bool]:
                 sets=[WorkoutSet(set_index=i, **s.model_dump()) for i, s in enumerate(entry.sets)],
             )
         )
-    db.add(workout)
-    db.flush()
+    try:
+        with db.begin_nested():
+            db.add(workout)
+            db.flush()
+    except IntegrityError:
+        # A concurrent request with the same client_id won the insert (double-tapped Save).
+        winner = db.scalar(select(Workout.id).where(Workout.client_id == data.client_id))
+        if winner is None:
+            raise
+        return get_workout(db, winner), False
     recompute_stats(db, exercise_ids)
     db.commit()
     return get_workout(db, workout.id), True

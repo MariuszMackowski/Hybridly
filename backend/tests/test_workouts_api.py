@@ -41,6 +41,19 @@ def test_create_workout_is_idempotent_by_client_id(client, db_session):
     assert db_session.scalar(select(func.count()).select_from(Workout)) == 1
 
 
+def test_concurrent_duplicate_client_id_returns_existing(client, db_session, monkeypatch):
+    """Two requests pass the existence check at the same time; the loser must not 500."""
+    import app.workouts.service as service
+
+    exercise = make_exercise(db_session)
+    payload = _payload(exercise.id, [{"weight_kg": 40, "reps": 8}])
+    first = client.post("/api/workouts", json=payload).json()
+    monkeypatch.setattr(service, "_existing_id", lambda db, client_id: None)
+    second = client.post("/api/workouts", json=payload)
+    assert second.status_code == 200
+    assert second.json()["id"] == first["id"]
+
+
 def test_set_needs_reps_or_seconds(client, db_session):
     exercise = make_exercise(db_session)
     response = client.post("/api/workouts", json=_payload(exercise.id, [{"weight_kg": 40}]))
