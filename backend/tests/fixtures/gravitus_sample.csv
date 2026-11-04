@@ -1,0 +1,41 @@
+Profile,,,,,,,,,,,
+last_login,created,updated,email,first_name,last_name,note,username,gender,avatar,referring_user,referring_page
+2026-01-01 00:00:00+00:00,2024-01-01 00:00:00+00:00,2026-01-01 00:00:00+00:00,test.user@example.com,Test,User,,,male,,,
+Workouts,,,,,,,,,,,
+created,updated,started_at,duration_seconds,is_private,description,title,bodyweight,gym,template,,
+2026-01-03 09:00:00+00:00,2026-01-03 09:00:00+00:00,2026-01-03 08:00:00+00:00,3000,True,,,,,,,
+2026-01-05 09:00:00+00:00,2026-01-05 09:00:00+00:00,2026-01-05 08:00:00+00:00,2400,True,,Leg day,,,Lower,,
+2026-01-07 09:00:00+00:00,2026-01-07 09:00:00+00:00,2026-01-07 08:00:00+00:00,1800,True,,,,,,,
+Workout Sets,,,,,,,,,,,
+group_number,set_number,seconds,distance_m,distance_unit,reps,weight,one_rep_equivalent,is_pr,rpe,exercise,workout
+0,0,,,,10,44.09,58.79,False,,Bench Press,2026-01-03 08:00:00+00:00 None
+0,1,,,,8,88.18,109.42,False,,Bench Press,2026-01-03 08:00:00+00:00 None
+0,2,,,,8,99.21,123.10,True,,Bench Press,2026-01-03 08:00:00+00:00 None
+0,3,,,,12,44.09,58.79,False,,Bench Press,2026-01-03 08:00:00+00:00 None
+1,0,,,,5,0,,False,,Pull-Up,2026-01-03 08:00:00+00:00 None
+1,1,,,,4,0,,False,,Pull-Up,2026-01-03 08:00:00+00:00 None
+0,0,,,,8,35.27,,False,,Bulgarian Split Squat,2026-01-05 08:00:00+00:00 Leg day
+1,0,45,,,,48.5,,False,,Farmer’s Carry,2026-01-05 08:00:00+00:00 Leg day
+0,0,,,,6,66.14,74.41,False,,Squat,2026-01-07 08:00:00+00:00 None
+0,0,,,,6,66.14,74.41,False,,Squat,2025-01-01 00:00:00+00:00 None
+Workout Group Notes,,,,,,,,,,,
+group_number,note,workout,,,,,,,,,
+Workout Videos,,,,,,,,,,,
+caption,thumbnail,video_file,workout_id,,,,,,,,
+Workout Templates,,,,,,,,,,,
+created,name,,,,,,,,,,
+2026-01-01 10:00:00+00:00,Upper,,,,,,,,,,
+Workout Template Group,,,,,,,,,,,
+group_number,index,exercise,template,,,,,,,,
+0,0,Bench Press,Upper,,,,,,,,
+1,0,Pull-Up,Upper,,,,,,,,
+1,1,Barbell Row,Upper,,,,,,,,
+Workout Template Set Goals,,,,,,,,,,,
+index,failure_set,seconds,distance_m,distance_unit,reps,weight,pct_ore,amap,group,,
+0,False,,,,10,44.09,,False,"Upper 0, 0",,
+Exercise Notes,,,,,,,,,,,
+text,exercise,,,,,,,,,,
+Exercise Videos,,,,,,,,,,,
+playlist_url,thumbnail,video_file,exercise_id,,,,,,,,
+Exercise Tips,,,,,,,,,,,
+text,exercise,num_likes,,,,,,,,,
