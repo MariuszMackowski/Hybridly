@@ -189,3 +189,5 @@ summary { min-height: 32px; display: flex; align-items: center; gap: 6px; cursor
 textarea.mono { font-family: ui-monospace, monospace; font-size: 12px; min-height: 160px; }
 summary { flex-wrap: wrap; }
 summary > strong { white-space: nowrap; }
+.start-btn { min-height: 52px; font-size: 18px; }
+.planned-tag { font-weight: 400; opacity: 0.8; }

@@ -13,6 +13,7 @@ export default function TodayPage() {
   const { draft, setDraft } = useDraft()
   const navigate = useNavigate()
   const [starting, setStarting] = useState(false)
+  const [picking, setPicking] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   /** Build a draft for the chosen template and open the logger. */
@@ -32,6 +33,11 @@ export default function TodayPage() {
   const t = today.data
   const toggle = useToggleRoutineDone()
   const planned = today.data?.template ?? null
+  /** Close the chooser and start the selected template. */
+  const choose = (template: TemplateOut | null) => {
+    setPicking(false)
+    start(template)
+  }
   const others = (templates.data ?? []).filter((t) => t.id !== planned?.id)
   const startedAt = draft
     ? new Date(draft.startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -104,25 +110,36 @@ export default function TodayPage() {
         </div>
       ) : (
         <>
-          {planned && (
-            <div className="card stack">
-              <span className="muted">Planned today</span>
-              <button className="btn-primary btn-block" disabled={starting} onClick={() => start(planned)}>
-                Start {planned.name}
-              </button>
+          <button className="btn-primary btn-block start-btn" disabled={starting} onClick={() => setPicking(true)}>
+            {starting ? 'Starting…' : 'Start workout'}
+          </button>
+          {picking && (
+            <div className="sheet-backdrop" onClick={() => setPicking(false)}>
+              <div className="sheet stack" onClick={(e) => e.stopPropagation()}>
+                <div className="row spread">
+                  <strong>Start workout</strong>
+                  <button className="btn-small" onClick={() => setPicking(false)}>
+                    Close
+                  </button>
+                </div>
+                <div className="sheet-list">
+                  {planned && (
+                    <button className="btn-primary btn-block list-item" onClick={() => choose(planned)}>
+                      {planned.name} <span className="planned-tag">· planned today</span>
+                    </button>
+                  )}
+                  {others.map((tpl) => (
+                    <button key={tpl.id} className="btn-block list-item" onClick={() => choose(tpl)}>
+                      {tpl.name}
+                    </button>
+                  ))}
+                  <button className="btn-block list-item" onClick={() => choose(null)}>
+                    Empty workout
+                  </button>
+                </div>
+              </div>
             </div>
           )}
-          <div className="card stack">
-            <span className="muted">{planned ? 'Other templates' : 'Templates'}</span>
-            {others.map((t) => (
-              <button key={t.id} className="btn-block" disabled={starting} onClick={() => start(t)}>
-                {t.name}
-              </button>
-            ))}
-            <button className="btn-block" disabled={starting} onClick={() => start(null)}>
-              Empty workout
-            </button>
-          </div>
         </>
       )}
 
