@@ -20,8 +20,8 @@ import ExerciseCard, { type CardActions } from './ExerciseCard'
 import ExercisePicker from './ExercisePicker'
 import { useDraft } from './useDraft'
 
-/** Elapsed "mm:ss" (or "h:mm:ss") since the workout started, ticking every second. */
-function useElapsed(startedAt: string | undefined) {
+/** Elapsed "mm:ss" (or "h:mm:ss") since a timestamp, ticking every second. */
+function useElapsed(startedAt: string | null | undefined) {
   const [now, setNow] = useState(Date.now())
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000)
@@ -63,6 +63,7 @@ export default function LoggerPage() {
   const save = useSaveWorkout()
   const navigate = useNavigate()
   const elapsed = useElapsed(draft?.startedAt)
+  const rest = useElapsed(draft?.restStartedAt)
   const [picker, setPicker] = useState<Picker>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -155,6 +156,11 @@ export default function LoggerPage() {
       <Checklist title="Cool-down" items={draft.cooldown} onToggle={(i) => update((d) => toggleChecklist(d, 'cooldown', i))} />
 
       <div className="save-bar">
+        {rest && (
+          <div className="rest-timer">
+            Rest <strong>{rest}</strong>
+          </div>
+        )}
         <button className="btn-primary btn-block" disabled={save.isPending || doneSets === 0} onClick={onSave}>
           {save.isPending ? 'Saving…' : `Save workout (${doneSets} sets)`}
         </button>

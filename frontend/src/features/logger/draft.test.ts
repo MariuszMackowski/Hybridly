@@ -96,6 +96,22 @@ describe('draft', () => {
     expect(hasLoggedSets(d.exercises[0])).toBe(true)
   })
 
+  it('ticking a set starts the rest timer', () => {
+    let d = createDraft(template([slot(1, 'Bench Press')]), { 1: ctx(bench) }, NOW, 'c1')
+    expect(d.restStartedAt ?? null).toBeNull()
+    const later = new Date('2026-11-04T07:05:00Z')
+    d = toggleDone(d, d.exercises[0].key, 0, later)
+    expect(d.restStartedAt).toBe(later.toISOString())
+  })
+
+  it('unticking a set keeps the rest timer', () => {
+    let d = createDraft(template([slot(1, 'Bench Press')]), { 1: ctx(bench) }, NOW, 'c1')
+    const later = new Date('2026-11-04T07:05:00Z')
+    d = toggleDone(d, d.exercises[0].key, 0, later)
+    d = toggleDone(d, d.exercises[0].key, 0, new Date('2026-11-04T07:06:00Z'))
+    expect(d.restStartedAt).toBe(later.toISOString())
+  })
+
   it('addSet copies last row values not done', () => {
     let d = createDraft(template([slot(1, 'Bench Press')]), { 1: ctx(bench, [[60, 8]]) }, NOW, 'c1')
     const key = d.exercises[0].key

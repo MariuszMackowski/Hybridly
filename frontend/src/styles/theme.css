@@ -124,7 +124,7 @@ summary { min-height: 32px; display: flex; align-items: center; gap: 6px; cursor
 .save-bar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
   padding: 10px 12px calc(env(safe-area-inset-bottom) + 10px);
-  background: rgba(15, 17, 21, 0.95); border-top: 1px solid var(--line);
+  background: var(--bg); border-top: 1px solid var(--line);
 }
 .save-bar button { max-width: 696px; margin: 0 auto; display: block; }
 
@@ -140,3 +140,6 @@ summary { min-height: 32px; display: flex; align-items: center; gap: 6px; cursor
 .exercise-link { border: none; background: none; padding: 0; text-align: left; flex: 1; }
 .btn.row { display: inline-flex; align-items: center; }
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.rest-timer { text-align: center; font-size: 15px; color: var(--muted); padding-bottom: 8px; font-variant-numeric: tabular-nums; }
+.rest-timer strong { color: var(--accent); font-size: 20px; margin-left: 6px; }
+.logger { padding-bottom: calc(env(safe-area-inset-bottom) + 130px); }

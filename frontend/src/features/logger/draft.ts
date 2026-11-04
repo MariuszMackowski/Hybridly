@@ -38,6 +38,8 @@ export type WorkoutDraft = {
   templateId: number | null
   title: string | null
   startedAt: string
+  /** When the last set was ticked; optional so drafts saved before this field still load. */
+  restStartedAt?: string | null
   warmup: { text: string; done: boolean }[]
   cooldown: { text: string; done: boolean }[]
   exercises: DraftExercise[]
@@ -175,8 +177,12 @@ export const removeSet = (d: WorkoutDraft, key: string, index: number) =>
 export const updateSet = (d: WorkoutDraft, key: string, index: number, patch: Partial<SetValues>) =>
   mapRow(d, key, index, (r) => ({ ...r, ...patch }))
 
-export const toggleDone = (d: WorkoutDraft, key: string, index: number) =>
-  mapRow(d, key, index, (r) => ({ ...r, done: !r.done }))
+/** Tick/untick a set; ticking (re)starts the rest timer. */
+export function toggleDone(d: WorkoutDraft, key: string, index: number, now: Date = new Date()): WorkoutDraft {
+  const row = d.exercises.find((ex) => ex.key === key)?.rows[index]
+  const next = mapRow(d, key, index, (r) => ({ ...r, done: !r.done }))
+  return row && !row.done ? { ...next, restStartedAt: now.toISOString() } : next
+}
 
 export function toggleChecklist(d: WorkoutDraft, list: 'warmup' | 'cooldown', index: number): WorkoutDraft {
   return { ...d, [list]: d[list].map((item, i) => (i === index ? { ...item, done: !item.done } : item)) }
