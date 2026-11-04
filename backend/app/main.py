@@ -2,6 +2,7 @@ from fastapi import APIRouter, FastAPI
 
 from app.bodyweight.router import router as bodyweight_router
 from app.exercises.router import router as exercises_router
+from app.workouts.router import router as workouts_router
 
 
 def _health_router() -> APIRouter:
@@ -19,7 +20,7 @@ def _health_router() -> APIRouter:
 def create_app() -> FastAPI:
     """Build the FastAPI application with all routers under /api."""
     app = FastAPI(title="Hybridly")
-    for router in (_health_router(), exercises_router, bodyweight_router):
+    for router in (_health_router(), exercises_router, bodyweight_router, workouts_router):
         app.include_router(router, prefix="/api")
     return app
 
