@@ -49,6 +49,7 @@ export default function CorosCard() {
               Last sync {dateTime(s.last_sync_at)}
               {last?.imported !== undefined && ` · ${last.imported} new`}
               {last?.deferred ? ` · ${last.deferred} waiting (daily limit)` : ''}
+              {last?.unparsable ? ` · ${last.unparsable} unreadable records` : ''}
             </span>
           )}
           {(last?.errors ?? []).map((e) => (

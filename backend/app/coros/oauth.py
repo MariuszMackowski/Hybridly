@@ -50,9 +50,12 @@ def _origin(server_url: str) -> str:
 
 def discover(server_url: str) -> AuthServer:
     """Read authorization server metadata (RFC 8414)."""
-    with _http() as http:
-        response = http.get(f"{_origin(server_url)}/.well-known/oauth-authorization-server")
-    response.raise_for_status()
+    try:
+        with _http() as http:
+            response = http.get(f"{_origin(server_url)}/.well-known/oauth-authorization-server")
+        response.raise_for_status()
+    except httpx.HTTPError as error:
+        raise OAuthError(f"COROS is not reachable: {error}") from error
     meta = response.json()
     return AuthServer(
         meta["authorization_endpoint"], meta["token_endpoint"], meta["registration_endpoint"]
@@ -73,18 +76,21 @@ def get_account(db: Session, server_url: str | None = None) -> CorosAccount:
 
 def _register(server: AuthServer, redirect_uri: str) -> str:
     """Dynamic client registration of a public client; returns client_id."""
-    with _http() as http:
-        response = http.post(
-            server.register,
-            json={
-                "client_name": "Hybridly",
-                "redirect_uris": [redirect_uri],
-                "grant_types": ["authorization_code", "refresh_token"],
-                "response_types": ["code"],
-                "token_endpoint_auth_method": "none",
-                "scope": SCOPE,
-            },
-        )
+    try:
+        with _http() as http:
+            response = http.post(
+                server.register,
+                json={
+                    "client_name": "Hybridly",
+                    "redirect_uris": [redirect_uri],
+                    "grant_types": ["authorization_code", "refresh_token"],
+                    "response_types": ["code"],
+                    "token_endpoint_auth_method": "none",
+                    "scope": SCOPE,
+                },
+            )
+    except httpx.HTTPError as error:
+        raise OAuthError(f"COROS is not reachable: {error}") from error
     if response.status_code >= 400:
         raise OAuthError(f"Client registration failed: {response.status_code} {response.text}")
     return response.json()["client_id"]
@@ -131,8 +137,11 @@ def _store_tokens(account: CorosAccount, payload: dict) -> None:
 def _token_request(account: CorosAccount, form: dict) -> httpx.Response:
     """POST to the token endpoint as a public client."""
     server = discover(account.server_url)
-    with _http() as http:
-        return http.post(server.token, data={**form, "client_id": account.client_id})
+    try:
+        with _http() as http:
+            return http.post(server.token, data={**form, "client_id": account.client_id})
+    except httpx.HTTPError as error:
+        raise OAuthError(f"COROS is not reachable: {error}") from error
 
 
 def finish_connect(db: Session, callback_url: str) -> None:
@@ -171,10 +180,12 @@ def get_access_token(db: Session) -> str:
     response = _token_request(
         account, {"grant_type": "refresh_token", "refresh_token": account.refresh_token}
     )
-    if response.status_code >= 400:
+    if response.status_code in (400, 401):
         account.status = "needs_reconnect"
         db.commit()
-        raise NeedsReconnect(f"Token refresh failed: {response.status_code}")
+        raise NeedsReconnect(f"Token refresh rejected: {response.status_code}")
+    if response.status_code >= 400:
+        raise OAuthError(f"Token refresh failed temporarily: {response.status_code}")
     _store_tokens(account, response.json())
     db.commit()
     return account.access_token

@@ -13,7 +13,7 @@ class Activity(Base):
     __tablename__ = "activity"
     __table_args__ = (
         CheckConstraint("source IN ('coros', 'upload')", name="ck_activity_source"),
-        UniqueConstraint("started_at", "sport", name="uq_activity_start_sport"),
+        UniqueConstraint("started_at", name="uq_activity_started_at"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)

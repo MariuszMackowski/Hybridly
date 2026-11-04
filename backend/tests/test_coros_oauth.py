@@ -116,3 +116,30 @@ def test_refresh_failure_marks_needs_reconnect(db_session, fake_as):
     with pytest.raises(oauth.NeedsReconnect):
         oauth.get_access_token(db_session)
     assert db_session.get(CorosAccount, 1).status == "needs_reconnect"
+
+
+def test_refresh_server_error_is_transient(db_session, fake_as, monkeypatch):
+    state = _query(oauth.start_connect(db_session, SERVER, REDIRECT))["state"]
+    oauth.finish_connect(db_session, f"{REDIRECT}?code=abc&state={state}")
+    db_session.get(CorosAccount, 1).expires_at = datetime.now(UTC) - timedelta(minutes=1)
+    original = fake_as.__call__
+
+    def flaky(request):
+        if request.url.path == "/oauth2/token":
+            return httpx.Response(503)
+        return original(request)
+
+    monkeypatch.setattr(oauth, "_http", lambda: httpx.Client(transport=httpx.MockTransport(flaky)))
+    with pytest.raises(oauth.OAuthError) as caught:
+        oauth.get_access_token(db_session)
+    assert not isinstance(caught.value, oauth.NeedsReconnect)
+    assert db_session.get(CorosAccount, 1).status == "connected"
+
+
+def test_network_error_becomes_oauth_error(db_session, monkeypatch):
+    def down(request):
+        raise httpx.ConnectError("no route")
+
+    monkeypatch.setattr(oauth, "_http", lambda: httpx.Client(transport=httpx.MockTransport(down)))
+    with pytest.raises(oauth.OAuthError):
+        oauth.start_connect(db_session, SERVER, REDIRECT)

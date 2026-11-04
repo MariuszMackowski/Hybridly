@@ -1,10 +1,12 @@
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { ActivityStreams } from '../../api/types'
+import { clampTo, robustDomain, rollingMedian } from '../../lib/chart'
 import { formatDuration, formatPace } from '../../lib/format'
 
 const HR_COLOR = '#ef4444'
 const PACE_COLOR = '#ff7a1a'
 const SLOWEST_PACE_S = 900 // clip standing still to 15:00/km so the axis stays readable
+const SMOOTH_POINTS = 7 // streams are 5 s apart → ~35 s rolling median
 
 /** Chart rows: time, HR and pace (s/km) for runs or speed (km/h) otherwise. */
 function rows(streams: ActivityStreams, isRun: boolean) {
@@ -19,21 +21,15 @@ function rows(streams: ActivityStreams, isRun: boolean) {
   })
 }
 
-/** 5th–95th percentile range so warm-up shuffles and GPS spikes do not flatten the line. */
-function robustDomain(values: (number | null)[]): [number, number] | undefined {
-  const sorted = values.filter((v): v is number => v !== null).sort((a, b) => a - b)
-  if (sorted.length < 10) return undefined
-  const at = (q: number) => sorted[Math.floor(q * (sorted.length - 1))]
-  const pad = (at(0.95) - at(0.05)) * 0.15 || 10
-  return [Math.max(0, at(0.05) - pad), at(0.95) + pad]
-}
-
 /** HR and pace over time; pace axis reversed so faster is higher. */
 export default function RunCharts(props: { streams: ActivityStreams; isRun: boolean }) {
-  const data = rows(props.streams, props.isRun)
+  const raw = rows(props.streams, props.isRun)
+  const smoothed = rollingMedian(raw.map((d) => d.pace), SMOOTH_POINTS)
+  const paceDomain = robustDomain(smoothed)
+  const pace = paceDomain ? clampTo(smoothed, paceDomain) : smoothed
+  const data = raw.map((d, i) => ({ ...d, pace: pace[i] }))
   const hasHr = data.some((d) => d.hr !== null)
   const hasPace = data.some((d) => d.pace !== null)
-  const paceDomain = robustDomain(data.map((d) => d.pace))
   if (!hasHr && !hasPace) return null
   return (
     <div className="card chart-card">
@@ -54,7 +50,6 @@ export default function RunCharts(props: { streams: ActivityStreams; isRun: bool
               fontSize={11}
               reversed={props.isRun}
               domain={paceDomain ?? ['dataMin', 'dataMax']}
-              allowDataOverflow
               tickFormatter={(v) => (props.isRun ? formatPace(v) : v.toFixed(0))}
             />
           )}

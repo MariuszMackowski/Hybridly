@@ -30,10 +30,12 @@ def _store_upload(db: Session, name: str, data: bytes) -> UploadResult:
         return UploadResult(filename=name, status="error", detail="File too large")
     try:
         parsed = parse_fit(data)
-    except ValueError as error:
-        return UploadResult(filename=name, status="error", detail=str(error))
-    with db.begin_nested():
-        activity, created = store_activity(db, parsed, data, "upload")
+        with db.begin_nested():
+            activity, created = store_activity(db, parsed, data, "upload")
+    except Exception as error:  # noqa: BLE001 — report per file, never fail the whole batch
+        return UploadResult(
+            filename=name, status="error", detail=str(error) or type(error).__name__
+        )
     return UploadResult(filename=name, status="created" if created else "duplicate", id=activity.id)
 
 

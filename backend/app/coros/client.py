@@ -14,6 +14,36 @@ class CorosError(Exception):
     """A COROS tool call failed or returned something unusable."""
 
 
+class CorosQuotaError(CorosError):
+    """COROS refused further calls (daily FIT quota / "anomaly" guard); stop and retry later."""
+
+
+class CorosAuthError(CorosError):
+    """The access token was rejected; the user has to reconnect."""
+
+
+_QUOTA_MARKERS = ("anomal", "quota", "limit exceeded", "rate limit", "too many")
+
+
+def _classify(text: str) -> CorosError:
+    """Error type for a failed tool result text."""
+    lowered = text.lower()
+    if any(marker in lowered for marker in _QUOTA_MARKERS):
+        return CorosQuotaError(text[:300])
+    return CorosError(text[:300] or "COROS tool error")
+
+
+def _is_unauthorized(error: BaseException) -> bool:
+    """Whether an (possibly grouped/chained) error is an HTTP 401 from the MCP server."""
+    if isinstance(error, BaseExceptionGroup):
+        return any(_is_unauthorized(e) for e in error.exceptions)
+    response = getattr(error, "response", None)
+    if getattr(response, "status_code", None) == 401 or "401" in str(error):
+        return True
+    cause = error.__cause__ or error.__context__
+    return cause is not None and cause is not error and _is_unauthorized(cause)
+
+
 class CorosClient(Protocol):
     """Calls the sync needs; each returns the tool's raw text (FIT: bytes)."""
 
@@ -28,7 +58,7 @@ def _text(result) -> str:
     """Join text items of a tool result; raise on tool errors."""
     text = "\n".join(c.text for c in result.content if hasattr(c, "text"))
     if result.is_error:
-        raise CorosError(text or "COROS tool error")
+        raise _classify(text)
     return text
 
 
@@ -38,7 +68,7 @@ def _blob(result) -> bytes:
         blob = getattr(getattr(item, "resource", None), "blob", None)
         if blob:
             return base64.b64decode(blob)
-    raise CorosError(_text(result) or "No FIT file in COROS response")
+    raise _classify(_text(result) or "No FIT file in COROS response")
 
 
 class McpCorosClient:
@@ -58,8 +88,13 @@ class McpCorosClient:
                     return await session.call_tool(tool, args)
 
     def _run(self, tool: str, args: dict):
-        """Run one tool call from synchronous code."""
-        return anyio.run(self._call, tool, args)
+        """Run one tool call from synchronous code; a 401 becomes CorosAuthError."""
+        try:
+            return anyio.run(self._call, tool, args)
+        except BaseException as error:
+            if isinstance(error, CorosError) or not _is_unauthorized(error):
+                raise
+            raise CorosAuthError("COROS rejected the access token") from error
 
     def list_records(self, start: date, end: date) -> str:
         """querySportRecords for a date window."""

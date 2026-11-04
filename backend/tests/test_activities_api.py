@@ -81,3 +81,21 @@ def test_delete_removes_activity_and_file(client, fit_dir):
     assert client.delete(f"/api/activities/{activity_id}").status_code == 204
     assert client.get(f"/api/activities/{activity_id}").status_code == 404
     assert list(fit_dir.glob("*.fit")) == []
+
+
+def test_same_start_different_sport_mapping_is_one_activity(client, db_session):
+    day = START.date()
+    start = datetime(day.year, day.month, day.day, 7, tzinfo=UTC)
+    _upload(client, ("hike.fit", make_fit(seconds=120, laps=1, sport="walking", start=start)))
+    db_session.add(CorosAccount(id=1, server_url="x", status="connected"))
+    run_sync(db_session, FakeClient([("6666", 100, day, "running")]), day)
+    assert db_session.scalar(select(func.count()).select_from(Activity)) == 1
+
+
+def test_upload_unexpected_parse_failure_reports_error(client, monkeypatch):
+    def broken(data):
+        raise AttributeError("no start_time")
+
+    monkeypatch.setattr("app.activities.router.parse_fit", broken)
+    result = _upload(client, ("odd.fit", make_fit())).json()
+    assert result[0]["status"] == "error"

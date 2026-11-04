@@ -29,10 +29,10 @@ def _save_file(data: bytes, digest: str) -> str:
     return str(path)
 
 
-def _find_existing(db: Session, digest: str, parsed: ParsedFit, sport: str) -> Activity | None:
-    """Same file, or same start time and sport (COROS vs. manual upload of one activity)."""
+def _find_existing(db: Session, digest: str, parsed: ParsedFit) -> Activity | None:
+    """Same file, or same start time (one person cannot start two activities at once)."""
     return db.scalar(select(Activity).where(Activity.fit_sha256 == digest)) or db.scalar(
-        select(Activity).where(Activity.started_at == parsed.started_at, Activity.sport == sport)
+        select(Activity).where(Activity.started_at == parsed.started_at)
     )
 
 
@@ -49,7 +49,7 @@ def store_activity(
     """Insert an activity, or return the existing one (COROS data is adopted on a match)."""
     digest = fit_sha256(data)
     sport = sport_from_coros(sport_type, parsed.sport)
-    existing = _find_existing(db, digest, parsed, sport)
+    existing = _find_existing(db, digest, parsed)
     if existing is not None:
         if source == "coros" and existing.external_id is None:
             existing.external_id, existing.sport_type = external_id, sport_type
