@@ -4,6 +4,7 @@ import { useTemplates, useToday } from '../../api/hooks'
 import type { TemplateOut } from '../../api/types'
 import { startDraft, useDraft } from '../logger/useDraft'
 import SessionCard from '../plan/SessionCard'
+import TodayRoutines from '../plan/TodayRoutines'
 import RecoveryCard from '../recovery/RecoveryCard'
 
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -87,6 +88,12 @@ export default function TodayPage() {
       {(t?.runs ?? []).map((run) => (
         <SessionCard key={run.id} session={run} />
       ))}
+      {planned && (
+        <div className="card stack">
+          <strong>🏋️ {planned.name}</strong>
+          <span className="muted">{planned.slots.map((s) => s.exercise_name).join(' · ') || 'No exercises'}</span>
+        </div>
+      )}
       {t?.strength_hint && <div className="card hint">🏋️ {t.strength_hint}</div>}
 
       {draft ? (
@@ -140,6 +147,7 @@ export default function TodayPage() {
         </>
       )}
 
+      {t && t.routines.length > 0 && <TodayRoutines day={t.date} planned={t.routines} />}
       <RecoveryCard />
     </div>
   )

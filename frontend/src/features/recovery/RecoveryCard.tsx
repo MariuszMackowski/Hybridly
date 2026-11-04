@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useRecovery } from '../../api/hooks'
 import BodyMap from './BodyMap'
 import MuscleList from './MuscleList'
+import RegionRows from './RegionRows'
 
 /** Full recovery view for Today: %, big front/back map, legend and most fatigued muscles. */
 export default function RecoveryCard() {
@@ -24,6 +25,7 @@ export default function RecoveryCard() {
           </Link>
         </div>
       </div>
+      <RegionRows regions={r.regions} />
       <BodyMap levels={r.muscles} size={300} />
       <div className="legend-bar">
         <span className="muted">fresh</span>

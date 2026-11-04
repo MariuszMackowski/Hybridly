@@ -14,6 +14,14 @@ MUSCLE_FULL = 6.0  # hard-set equivalents that make a muscle fully red
 FULL_RECOVERY_SHARE = 0.05
 MIN_CAPACITY = 120.0
 CAPACITY_FACTOR = 3.0
+REGION_READY_LEVEL = 0.3  # a region counts as recovered once its most fatigued muscle is below this
+REGIONS = {
+    "upper": (
+        "chest", "front_delts", "side_delts", "rear_delts", "lats", "upper_back", "biceps",
+        "triceps", "forearms", "abs", "obliques", "lower_back",
+    ),
+    "lower": ("glutes", "quads", "hamstrings", "adductors", "abductors", "calves", "tibialis"),
+}
 
 
 @dataclass
@@ -23,6 +31,15 @@ class Event:
     at: datetime
     load: float
     muscles: dict[str, float] = field(default_factory=dict)
+
+
+@dataclass
+class RegionRecovery:
+    """Recovery of one body region, driven by its most fatigued muscle."""
+
+    region: str
+    recovery_pct: int
+    hours_to_ready: int
 
 
 @dataclass
@@ -73,8 +90,8 @@ def capacity_from_daily(daily_loads: list[float]) -> float:
     return max(MIN_CAPACITY, CAPACITY_FACTOR * mean)
 
 
-def muscle_levels(events: list[Event], now: datetime) -> dict[str, float]:
-    """0..1 fatigue per muscle (1 = MUSCLE_FULL hard sets right now)."""
+def muscle_scores(events: list[Event], now: datetime) -> dict[str, float]:
+    """Decayed hard-set equivalents per muscle (unclamped)."""
     scores: dict[str, float] = {}
     for event in events:
         if event.at > now:
@@ -82,4 +99,26 @@ def muscle_levels(events: list[Event], now: datetime) -> dict[str, float]:
         factor = decay(_hours(now, event.at), MUSCLE_TAU_H)
         for muscle, amount in event.muscles.items():
             scores[muscle] = scores.get(muscle, 0.0) + amount * factor
+    return scores
+
+
+def levels_from_scores(scores: dict[str, float]) -> dict[str, float]:
+    """0..1 fatigue per muscle (1 = MUSCLE_FULL hard sets right now)."""
     return {m: round(min(1.0, s / MUSCLE_FULL), 3) for m, s in scores.items()}
+
+
+def muscle_levels(events: list[Event], now: datetime) -> dict[str, float]:
+    """0..1 fatigue per muscle from events."""
+    return levels_from_scores(muscle_scores(events, now))
+
+
+def region_recovery(scores: dict[str, float]) -> list[RegionRecovery]:
+    """Per region: 100 − fatigue of its worst muscle; hours until that muscle is ready."""
+    ready = REGION_READY_LEVEL * MUSCLE_FULL
+    out = []
+    for region, muscles in REGIONS.items():
+        worst = max((scores.get(m, 0.0) for m in muscles), default=0.0)
+        pct = round(100 * (1 - min(1.0, worst / MUSCLE_FULL)))
+        hours = math.ceil(MUSCLE_TAU_H * math.log(worst / ready)) if worst > ready else 0
+        out.append(RegionRecovery(region, pct, hours))
+    return out

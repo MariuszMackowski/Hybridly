@@ -42,7 +42,7 @@ export default function TodayRoutines(props: { day: string; planned: { routine: 
 
   return (
     <div className="card stack">
-      <strong>Today</strong>
+      <strong>🏠 Home routines</strong>
       {shown.length === 0 && <span className="muted">Nothing planned today.</span>}
       {shown.map((r) => (
         <RoutineItem key={r.id} routine={r} done={done.has(r.id)} onToggle={() => flip(r)} />

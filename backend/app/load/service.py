@@ -15,8 +15,10 @@ from app.load.model import (
     Event,
     activity_load,
     capacity_from_daily,
-    muscle_levels,
+    levels_from_scores,
+    muscle_scores,
     recovery,
+    region_recovery,
     strength_set_load,
 )
 from app.time import local_date, utc_now
@@ -38,6 +40,14 @@ class DayLoad(BaseModel):
     cardio: float
 
 
+class RegionOut(BaseModel):
+    """Recovery of one body region (upper / lower)."""
+
+    region: str
+    recovery_pct: int
+    hours_to_ready: int
+
+
 class RecoveryOut(BaseModel):
     """Recovery state for the Today card and the Recovery page."""
 
@@ -47,6 +57,7 @@ class RecoveryOut(BaseModel):
     capacity: float
     coros_pct: int | None
     muscles: dict[str, float]
+    regions: list[RegionOut]
     daily: list[DayLoad]
 
 
@@ -119,6 +130,7 @@ def current_state(db: Session) -> RecoveryOut:
     window = _daily(events, today - timedelta(days=WINDOW_DAYS - 1), WINDOW_DAYS)
     capacity = capacity_from_daily([d.strength + d.cardio for d in window.values()])
     state = recovery([e for e, _ in events], now, capacity)
+    scores = muscle_scores([e for e, _ in events], now)
     coros = db.scalar(
         select(CorosDaily)
         .where(CorosDaily.kind == "recovery", CorosDaily.day <= today)
@@ -131,6 +143,7 @@ def current_state(db: Session) -> RecoveryOut:
         acute=state.acute,
         capacity=state.capacity,
         coros_pct=(coros.data or {}).get("recovery_pct") if coros else None,
-        muscles=muscle_levels([e for e, _ in events], now),
+        muscles=levels_from_scores(scores),
+        regions=[RegionOut(**vars(r)) for r in region_recovery(scores)],
         daily=list(window.values())[-DAILY_DAYS:],
     )

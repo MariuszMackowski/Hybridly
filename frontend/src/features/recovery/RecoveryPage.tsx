@@ -2,6 +2,7 @@ import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recha
 import { useRecovery } from '../../api/hooks'
 import BodyMap from './BodyMap'
 import MuscleList from './MuscleList'
+import RegionRows from './RegionRows'
 
 /** Recovery %, muscle map and two weeks of load. */
 export default function RecoveryPage() {
@@ -20,6 +21,7 @@ export default function RecoveryPage() {
         {r.coros_pct !== null && <span className="muted">COROS {r.coros_pct}%</span>}
       </div>
       <div className="card stack">
+        <RegionRows regions={r.regions} />
         <BodyMap levels={r.muscles} size={300} />
         <div className="legend-bar">
           <span className="muted">fresh</span>

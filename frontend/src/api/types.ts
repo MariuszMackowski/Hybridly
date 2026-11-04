@@ -314,5 +314,6 @@ export interface RecoveryState {
   capacity: number
   coros_pct: number | null
   muscles: Record<string, number>
+  regions: { region: string; recovery_pct: number; hours_to_ready: number }[]
   daily: { day: string; strength: number; cardio: number }[]
 }
