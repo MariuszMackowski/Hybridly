@@ -11,6 +11,7 @@ import {
   useVideos,
 } from '../../api/hooks'
 import type { Routine } from '../../api/types'
+import BackButton from '../../components/BackButton'
 import TodayRoutines from './TodayRoutines'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -101,6 +102,7 @@ export default function RoutinesPage() {
   const [editing, setEditing] = useState<Routine | null | 'new'>(null)
   return (
     <div className="page stack">
+      <BackButton to="/settings" label="Settings" />
       <h1>Home routines</h1>
       {today && <TodayRoutines day={today.date} planned={today.routines} />}
       <p className="muted">

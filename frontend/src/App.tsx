@@ -17,12 +17,11 @@ const TABS = [
   { to: '/', label: 'Today' },
   { to: '/history', label: 'History' },
   { to: '/plan', label: 'Plan' },
-  { to: '/routines', label: 'Routines' },
   { to: '/settings', label: 'Settings' },
 ]
 
 /** Pages reached from Settings keep the Settings tab highlighted. */
-const SETTINGS_PATHS = ['/settings', '/exercises', '/templates', '/week']
+const SETTINGS_PATHS = ['/settings', '/exercises', '/templates', '/week', '/routines']
 
 /** Bottom navigation; hidden while logging a workout. */
 function TabBar() {

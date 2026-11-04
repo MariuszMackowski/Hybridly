@@ -34,6 +34,10 @@ export default function SettingsPage() {
           <span>Week plan</span>
           <span className="muted">›</span>
         </Link>
+        <Link to="/routines" className="row spread">
+          <span>Home routines</span>
+          <span className="muted">›</span>
+        </Link>
       </div>
       <CorosCard />
       <div className="card stack">

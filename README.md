@@ -49,8 +49,7 @@ Sync runs in the Celery worker: once whenever the stack starts and on **Sync now
 - **Plan** tab → *Instructions for your AI coach*: copy the format description, send it to the coach, then import the YAML it returns (file or paste). CLI: `python -m app.cli import-plan /data/seed/<plan>.yaml`.
 - A newer plan takes over from `max(its first week, today)`; earlier days keep the plan that was active then. Runs are matched to planned sessions automatically (same day, otherwise ±1 day if the distance is plausible) and compared: distance, pace vs. range, time in HR zone, interval laps.
 - **Today** shows the planned run, week progress, coach notes, the strength template (with a cutback/taper hint) and the recovery view.
-- **Routines** tab: today's checklist on top; below, add YouTube links to the library, group them into routines (alternatives — doing one counts) and assign them to weekdays.
-- Exercises, templates and the weekday template plan live under **Settings → Training setup**.
+- Exercises, templates, the weekday template plan and home routines live under **Settings → Training setup**. Home routines: today's checklist on top; below, add YouTube links to the library, group them into routines (alternatives — doing one counts) and assign them to weekdays.
 
 ## Load & recovery
 
