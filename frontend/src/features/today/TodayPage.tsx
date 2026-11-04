@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTemplates, useToday, useToggleRoutineDone } from '../../api/hooks'
+import { useTemplates, useToday } from '../../api/hooks'
 import type { TemplateOut } from '../../api/types'
 import { startDraft, useDraft } from '../logger/useDraft'
 import SessionCard from '../plan/SessionCard'
+import TodayRoutines from './TodayRoutines'
 
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -31,7 +32,6 @@ export default function TodayPage() {
   }
 
   const t = today.data
-  const toggle = useToggleRoutineDone()
   const planned = today.data?.template ?? null
   /** Close the chooser and start the selected template. */
   const choose = (template: TemplateOut | null) => {
@@ -143,31 +143,7 @@ export default function TodayPage() {
         </>
       )}
 
-      {(t?.routines ?? []).length > 0 && (
-        <div className="card stack">
-          <span className="muted">Home routines</span>
-          {t!.routines.map(({ routine, done }) => (
-            <div key={routine.id} className="stack routine">
-              <label className="row check-item">
-                <input
-                  type="checkbox"
-                  checked={done}
-                  onChange={() => toggle.mutate({ routineId: routine.id, day: t!.date, done: !done })}
-                />
-                <strong>{routine.name}</strong>
-              </label>
-              <div className="videos">
-                {routine.videos.map((v) => (
-                  <a key={v.id} href={v.url} target="_blank" rel="noopener" className="video">
-                    {v.thumbnail_url && <img src={v.thumbnail_url} alt="" />}
-                    <span>{v.title}</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {t && <TodayRoutines day={t.date} planned={t.routines} />}
     </div>
   )
 }

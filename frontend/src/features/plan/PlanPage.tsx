@@ -4,7 +4,6 @@ import { useActivePlan, useImportPlan, usePlanInstructions, useToday } from '../
 import type { PlanWeek } from '../../api/types'
 import { sessionStatus } from '../../lib/plan'
 import { targets } from './SessionCard'
-import RoutinesEditor from './RoutinesEditor'
 
 const STATUS_ICON = { done: '✓', missed: '✗', today: '•', upcoming: '' } as const
 const weekday = (iso: string) =>
@@ -130,7 +129,12 @@ export default function PlanPage() {
   const current = p?.weeks.find((w) => w.start <= today && today < addDays(w.start, 7))
   return (
     <div className="page stack">
-      <h1>Plan</h1>
+      <div className="row spread">
+        <h1>Plan</h1>
+        <Link to="/routines" className="btn btn-small row">
+          🏠 Home routines ›
+        </Link>
+      </div>
       {p ? (
         <div className="card stack">
           <strong>{p.name}</strong>
@@ -149,7 +153,6 @@ export default function PlanPage() {
       ))}
       <ImportPlan />
       <CoachInstructions />
-      <RoutinesEditor />
     </div>
   )
 }

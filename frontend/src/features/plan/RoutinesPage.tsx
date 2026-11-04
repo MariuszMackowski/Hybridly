@@ -66,7 +66,6 @@ function RoutineWeek({ routines }: { routines: Routine[] }) {
     )
   return (
     <div className="stack">
-      <span className="muted">Week plan</span>
       {items.map((item) => (
         <div key={item.weekday} className="row" style={{ flexWrap: 'wrap' }}>
           <span style={{ width: 40 }}>{DAYS[item.weekday]}</span>
@@ -88,8 +87,8 @@ function RoutineWeek({ routines }: { routines: Routine[] }) {
   )
 }
 
-/** Video library, routines and their weekday plan. */
-export default function RoutinesEditor() {
+/** Video library, routines and their weekday plan — three steps on one page. */
+export default function RoutinesPage() {
   const videos = useVideos().data ?? []
   const routines = useRoutines().data ?? []
   const addVideo = useAddVideo()
@@ -98,15 +97,14 @@ export default function RoutinesEditor() {
   const [url, setUrl] = useState('')
   const [editing, setEditing] = useState<Routine | null | 'new'>(null)
   return (
-    <details className="card">
-      <summary>
-        <strong>Home routines</strong>
-        <span className="muted">
-          {routines.length} routines · {videos.length} videos
-        </span>
-      </summary>
-      <div className="stack">
-        <span className="muted">Video library</span>
+    <div className="page stack">
+      <h1>Home routines</h1>
+      <p className="muted">
+        A routine (e.g. Core) is a slot with one or more YouTube videos — alternatives, doing any one counts. Assign
+        routines to weekdays and tick them off on Today.
+      </p>
+      <div className="card stack">
+        <strong>1 · Add videos</strong>
         <div className="row">
           <input placeholder="YouTube link" value={url} onChange={(e) => setUrl(e.target.value)} />
           <button disabled={!url.trim() || addVideo.isPending} onClick={() => addVideo.mutate(url.trim(), { onSuccess: () => setUrl('') })}>
@@ -126,7 +124,10 @@ export default function RoutinesEditor() {
           </div>
         ))}
 
-        <span className="muted">Routines</span>
+      </div>
+      <div className="card stack">
+        <strong>2 · Build routines</strong>
+        {videos.length === 0 && <span className="muted">Add at least one video first.</span>}
         {editing !== null ? (
           <RoutineForm routine={editing === 'new' ? null : editing} onDone={() => setEditing(null)} />
         ) : (
@@ -144,8 +145,11 @@ export default function RoutinesEditor() {
             <button onClick={() => setEditing('new')}>+ New routine</button>
           </>
         )}
-        {routines.length > 0 && <RoutineWeek routines={routines} />}
       </div>
-    </details>
+      <div className="card stack">
+        <strong>3 · Plan the week</strong>
+        {routines.length > 0 ? <RoutineWeek routines={routines} /> : <span className="muted">Create a routine first.</span>}
+      </div>
+    </div>
   )
 }

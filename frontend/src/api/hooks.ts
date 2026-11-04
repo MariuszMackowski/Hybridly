@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet, apiSend } from './client'
 import type {
+  PlanSession,
   Plan,
   Routine,
   TodayFull,
@@ -218,7 +219,7 @@ export const useLinkSession = () =>
   useInvalidatingMutation(
     ({ sessionId, activityId }: { sessionId: number; activityId: number | null }) =>
       apiSend('POST', `/plans/sessions/${sessionId}/link`, { activity_id: activityId }),
-    [['plan'], ['activities'], ['today']],
+    [['plan'], ['activities'], ['today'], ['history']],
   )
 
 export const useVideos = () => useQuery({ queryKey: ['videos'], queryFn: () => apiGet<Video[]>('/videos') })
@@ -259,3 +260,17 @@ export const useToggleRoutineDone = () =>
       apiSend<void>(done ? 'PUT' : 'DELETE', `/routines/${routineId}/done/${day}`),
     [['today']],
   )
+
+export const useSessionsBetween = (start: string, end: string, enabled = true) =>
+  useQuery({
+    queryKey: ['plan', 'sessions', start, end],
+    queryFn: () => apiGet<PlanSession[]>(`/plans/sessions?start=${start}&end=${end}`),
+    enabled,
+  })
+
+export const useRoutineDone = (day: string | undefined) =>
+  useQuery({
+    queryKey: ['today', 'routine-done', day],
+    queryFn: () => apiGet<number[]>(`/routines/done?day=${day}`),
+    enabled: !!day,
+  })
