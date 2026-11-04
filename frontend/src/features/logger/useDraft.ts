@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { fetchContext } from '../../api/hooks'
 import type { TemplateOut } from '../../api/types'
+import { uuid } from '../../lib/uuid'
 import { createDraft, type WorkoutDraft } from './draft'
 import { clearDraft, loadDraft, saveDraft } from './storage'
 
@@ -30,7 +31,7 @@ export async function startDraft(template: TemplateOut | null): Promise<WorkoutD
     slots.map((s) => fetchContext(s.exercise_id, s.sets, s.rep_min, s.rep_max)),
   )
   const byId = Object.fromEntries(contexts.map((c) => [c.exercise.id, c]))
-  const draft = createDraft(template, byId, new Date(), crypto.randomUUID())
+  const draft = createDraft(template, byId, new Date(), uuid())
   saveDraft(draft)
   return draft
 }
