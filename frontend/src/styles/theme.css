@@ -135,3 +135,7 @@ summary { min-height: 32px; display: flex; align-items: center; gap: 6px; cursor
 }
 .sheet-list { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; max-height: 50vh; }
 .list-item { text-align: left; }
+
+.exercise-link { border: none; background: none; padding: 0; text-align: left; flex: 1; }
+.btn.row { display: inline-flex; align-items: center; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
