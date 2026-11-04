@@ -129,12 +129,7 @@ export default function PlanPage() {
   const current = p?.weeks.find((w) => w.start <= today && today < addDays(w.start, 7))
   return (
     <div className="page stack">
-      <div className="row spread">
-        <h1>Plan</h1>
-        <Link to="/routines" className="btn btn-small row">
-          🏠 Home routines ›
-        </Link>
-      </div>
+      <h1>Plan</h1>
       {p ? (
         <div className="card stack">
           <strong>{p.name}</strong>
