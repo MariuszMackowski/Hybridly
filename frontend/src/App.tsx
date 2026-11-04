@@ -10,16 +10,19 @@ import RunDetailPage from './features/runs/RunDetailPage'
 import SettingsPage from './features/settings/SettingsPage'
 import TemplateEditor from './features/templates/TemplateEditor'
 import TemplatesPage from './features/templates/TemplatesPage'
+import WeekPage from './features/templates/WeekPage'
 import TodayPage from './features/today/TodayPage'
 
 const TABS = [
   { to: '/', label: 'Today' },
   { to: '/history', label: 'History' },
   { to: '/plan', label: 'Plan' },
-  { to: '/exercises', label: 'Exercises' },
-  { to: '/templates', label: 'Templates' },
+  { to: '/routines', label: 'Routines' },
   { to: '/settings', label: 'Settings' },
 ]
+
+/** Pages reached from Settings keep the Settings tab highlighted. */
+const SETTINGS_PATHS = ['/settings', '/exercises', '/templates', '/week']
 
 /** Bottom navigation; hidden while logging a workout. */
 function TabBar() {
@@ -28,7 +31,14 @@ function TabBar() {
   return (
     <nav className="tabbar">
       {TABS.map((tab) => (
-        <NavLink key={tab.to} to={tab.to} end={tab.to === '/'}>
+        <NavLink
+          key={tab.to}
+          to={tab.to}
+          end={tab.to === '/'}
+          className={({ isActive }) =>
+            isActive || (tab.to === '/settings' && SETTINGS_PATHS.some((p) => pathname.startsWith(p))) ? 'active' : ''
+          }
+        >
           {tab.label}
         </NavLink>
       ))}
@@ -52,6 +62,7 @@ export default function App() {
         <Route path="/exercises" element={<ExercisesPage />} />
         <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/templates/:id" element={<TemplateEditor />} />
+        <Route path="/week" element={<WeekPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Routes>
       <TabBar />

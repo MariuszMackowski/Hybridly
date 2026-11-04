@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useRoutineDone, useRoutines, useToggleRoutineDone } from '../../api/hooks'
 import type { Routine } from '../../api/types'
 
@@ -23,7 +22,7 @@ function RoutineItem(props: { routine: Routine; done: boolean; onToggle: () => v
   )
 }
 
-/** Today's home routines, plus any other routine picked ad hoc. */
+/** Today's home routine checklist, plus any other routine picked ad hoc. */
 export default function TodayRoutines(props: { day: string; planned: { routine: Routine; done: boolean }[] }) {
   const all = useRoutines().data ?? []
   const done = new Set(useRoutineDone(props.day).data ?? [])
@@ -38,31 +37,20 @@ export default function TodayRoutines(props: { day: string; planned: { routine: 
   ]
   const others = all.filter((r) => !shown.some((s) => s.id === r.id))
   const flip = (r: Routine) => toggle.mutate({ routineId: r.id, day: props.day, done: !done.has(r.id) })
+  // Nothing to tick yet — the setup steps below the checklist cover this case.
+  if (all.length === 0) return null
 
   return (
     <div className="card stack">
-      <div className="row spread">
-        <span className="muted">🏠 Home routines</span>
-        <Link to="/routines" className="muted">
-          Manage ›
-        </Link>
-      </div>
-      {all.length === 0 ? (
-        <Link to="/routines" className="btn btn-block row" style={{ justifyContent: 'center' }}>
-          Set up home routines ›
-        </Link>
-      ) : (
-        <>
-          {shown.length === 0 && <span className="muted">Nothing planned today.</span>}
-          {shown.map((r) => (
-            <RoutineItem key={r.id} routine={r} done={done.has(r.id)} onToggle={() => flip(r)} />
-          ))}
-          {others.length > 0 && (
-            <button className="btn-block" onClick={() => setPicking(true)}>
-              + Other routine
-            </button>
-          )}
-        </>
+      <strong>Today</strong>
+      {shown.length === 0 && <span className="muted">Nothing planned today.</span>}
+      {shown.map((r) => (
+        <RoutineItem key={r.id} routine={r} done={done.has(r.id)} onToggle={() => flip(r)} />
+      ))}
+      {others.length > 0 && (
+        <button className="btn-block" onClick={() => setPicking(true)}>
+          + Other routine
+        </button>
       )}
       {picking && (
         <div className="sheet-backdrop" onClick={() => setPicking(false)}>

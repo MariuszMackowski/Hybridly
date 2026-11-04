@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useArchiveExercise, useExercises } from '../../api/hooks'
 import type { ExerciseOut } from '../../api/types'
+import BackButton from '../../components/BackButton'
 import ExerciseForm from './ExerciseForm'
 
 type Editing = { exercise: ExerciseOut | null } | null
@@ -22,6 +23,7 @@ export default function ExercisesPage() {
   const list = (exercises.data ?? []).filter((e) => !needle || e.name.toLowerCase().includes(needle))
   return (
     <div className="page stack">
+      <BackButton to="/settings" label="Settings" />
       <div className="row spread">
         <h1>Exercises</h1>
         <button className="btn-small btn-primary" onClick={() => setEditing({ exercise: null })}>

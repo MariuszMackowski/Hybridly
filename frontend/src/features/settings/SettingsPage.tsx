@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useBodyweight, useSaveBodyweight, useToday } from '../../api/hooks'
 import { parseDecimal } from '../../lib/decimal'
 import { kg } from '../../lib/format'
@@ -20,6 +20,21 @@ export default function SettingsPage() {
       <h1>Settings</h1>
       {params.get('coros') === 'connected' && <div className="card good">COROS connected — first sync started.</div>}
       {corosError && <div className="banner">COROS: {corosError}</div>}
+      <div className="card stack">
+        <strong>Training setup</strong>
+        <Link to="/exercises" className="row spread">
+          <span>Exercises</span>
+          <span className="muted">›</span>
+        </Link>
+        <Link to="/templates" className="row spread">
+          <span>Templates</span>
+          <span className="muted">›</span>
+        </Link>
+        <Link to="/week" className="row spread">
+          <span>Week plan</span>
+          <span className="muted">›</span>
+        </Link>
+      </div>
       <CorosCard />
       <div className="card stack">
         <strong>Bodyweight</strong>

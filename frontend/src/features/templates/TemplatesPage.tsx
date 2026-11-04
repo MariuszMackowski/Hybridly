@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom'
 import { useTemplates } from '../../api/hooks'
-import WeekEditor from './WeekEditor'
+import BackButton from '../../components/BackButton'
 
 export default function TemplatesPage() {
   const templates = useTemplates()
   const list = templates.data ?? []
   return (
     <div className="page stack">
+      <BackButton to="/settings" label="Settings" />
       <div className="row spread">
         <h1>Templates</h1>
         <Link to="/templates/new" className="btn btn-small btn-primary row">
@@ -19,7 +20,6 @@ export default function TemplatesPage() {
           <span className="muted">{t.slots.map((s) => s.exercise_name).join(' · ') || 'No exercises'}</span>
         </Link>
       ))}
-      <WeekEditor templates={list} />
     </div>
   )
 }

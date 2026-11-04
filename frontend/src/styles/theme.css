@@ -200,3 +200,6 @@ summary > strong { white-space: nowrap; }
 .body-figure figcaption { font-size: 11px; }
 .legend-bar { display: flex; align-items: center; gap: 8px; font-size: 11px; }
 .legend-bar i { flex: 1; height: 6px; border-radius: 3px; background: linear-gradient(90deg, rgb(230,232,236), rgb(250,204,21), rgb(239,68,68)); }
+
+/* Section heading inside long editors (e.g. template: warm-up / exercises / cool-down) */
+.section-title { font-size: 13px; font-weight: 600; margin: 8px 0 0; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }

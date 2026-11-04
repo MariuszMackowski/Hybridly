@@ -55,7 +55,6 @@ export default function RunDetailPage() {
         <Tile label="Calories" value={a.calories} />
       </div>
       <PlanLink activity={a} />
-      <RunCharts streams={a.streams} isRun={isRun} />
       <RunMap streams={a.streams} />
       {a.laps.length > 0 && (
         <div className="card">
@@ -94,6 +93,7 @@ export default function RunDetailPage() {
           </table>
         </div>
       )}
+      <RunCharts streams={a.streams} isRun={isRun} />
       <button
         className="btn-danger btn-block"
         disabled={remove.isPending}

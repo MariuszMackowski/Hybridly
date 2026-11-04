@@ -125,6 +125,8 @@ export default function TemplateEditor() {
         <ItemList title="Warm-up checklist" items={form.warmup_items} onChange={(v) => setForm({ ...form, warmup_items: v })} />
       </div>
 
+      <h2 className="section-title">Exercises</h2>
+      {form.slots.length === 0 && <span className="muted">No exercises yet.</span>}
       {form.slots.map((slot, i) => (
         <div key={i} className="card stack">
           <div className="row spread">

@@ -4,7 +4,6 @@ import { useTemplates, useToday } from '../../api/hooks'
 import type { TemplateOut } from '../../api/types'
 import { startDraft, useDraft } from '../logger/useDraft'
 import SessionCard from '../plan/SessionCard'
-import TodayRoutines from './TodayRoutines'
 import RecoveryCard from '../recovery/RecoveryCard'
 
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -141,7 +140,6 @@ export default function TodayPage() {
         </>
       )}
 
-      {t && <TodayRoutines day={t.date} planned={t.routines} />}
       <RecoveryCard />
     </div>
   )

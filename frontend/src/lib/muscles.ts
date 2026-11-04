@@ -12,11 +12,15 @@ export function fatigueColor(level: number): string {
   return `rgb(${r}, ${g}, ${b})`
 }
 
+/** Every muscle, most fatigued first. */
+export function byFatigue(levels: Record<string, number>): [string, number][] {
+  return Object.entries(levels).sort((a, b) => b[1] - a[1])
+}
+
 /** Most fatigued muscles first, ignoring ones below 5 %. */
 export function topMuscles(levels: Record<string, number>, n: number): [string, number][] {
-  return Object.entries(levels)
+  return byFatigue(levels)
     .filter(([, v]) => v >= 0.05)
-    .sort((a, b) => b[1] - a[1])
     .slice(0, n)
 }
 

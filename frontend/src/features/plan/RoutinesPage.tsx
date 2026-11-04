@@ -7,9 +7,11 @@ import {
   useRoutineWeek,
   useSaveRoutine,
   useSaveRoutineWeek,
+  useToday,
   useVideos,
 } from '../../api/hooks'
 import type { Routine } from '../../api/types'
+import TodayRoutines from './TodayRoutines'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -91,6 +93,7 @@ function RoutineWeek({ routines }: { routines: Routine[] }) {
 export default function RoutinesPage() {
   const videos = useVideos().data ?? []
   const routines = useRoutines().data ?? []
+  const today = useToday().data
   const addVideo = useAddVideo()
   const deleteVideo = useDeleteVideo()
   const archive = useArchiveRoutine()
@@ -99,9 +102,10 @@ export default function RoutinesPage() {
   return (
     <div className="page stack">
       <h1>Home routines</h1>
+      {today && <TodayRoutines day={today.date} planned={today.routines} />}
       <p className="muted">
         A routine (e.g. Core) is a slot with one or more YouTube videos — alternatives, doing any one counts. Assign
-        routines to weekdays and tick them off on Today.
+        routines to weekdays and tick them off above.
       </p>
       <div className="card stack">
         <strong>1 · Add videos</strong>

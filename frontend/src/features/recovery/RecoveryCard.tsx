@@ -1,13 +1,12 @@
 import { Link } from 'react-router-dom'
 import { useRecovery } from '../../api/hooks'
-import { fatigueColor, muscleLabel, topMuscles } from '../../lib/muscles'
 import BodyMap from './BodyMap'
+import MuscleList from './MuscleList'
 
 /** Full recovery view for Today: %, big front/back map, legend and most fatigued muscles. */
 export default function RecoveryCard() {
   const r = useRecovery().data
   if (!r) return null
-  const top = topMuscles(r.muscles, 6)
   return (
     <div className="card stack">
       <div className="row spread">
@@ -31,13 +30,7 @@ export default function RecoveryCard() {
         <i />
         <span className="muted">fatigued</span>
       </div>
-      {top.length === 0 && <span className="muted">All muscles fresh.</span>}
-      {top.map(([m, v]) => (
-        <div key={m} className="row spread">
-          <span>{muscleLabel(m)}</span>
-          <span style={{ color: fatigueColor(v) }}>{Math.round(v * 100)}%</span>
-        </div>
-      ))}
+      <MuscleList levels={r.muscles} />
     </div>
   )
 }

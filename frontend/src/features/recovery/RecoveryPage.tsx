@@ -1,7 +1,7 @@
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useRecovery } from '../../api/hooks'
-import { fatigueColor, muscleLabel, topMuscles } from '../../lib/muscles'
 import BodyMap from './BodyMap'
+import MuscleList from './MuscleList'
 
 /** Recovery %, muscle map and two weeks of load. */
 export default function RecoveryPage() {
@@ -26,12 +26,7 @@ export default function RecoveryPage() {
           <i />
           <span className="muted">fatigued</span>
         </div>
-        {topMuscles(r.muscles, 6).map(([m, v]) => (
-          <div key={m} className="row spread">
-            <span>{muscleLabel(m)}</span>
-            <span style={{ color: fatigueColor(v) }}>{Math.round(v * 100)}%</span>
-          </div>
-        ))}
+        <MuscleList levels={r.muscles} />
       </div>
       <div className="card">
         <strong>Load · last 14 days</strong>
