@@ -52,7 +52,6 @@ export default function TodayPage() {
           <div className="muted">{today.data?.date}</div>
         </div>
       </div>
-      <RecoveryCard />
       {t?.week && (
         <div className="card week-card">
           <div className="row spread">
@@ -143,6 +142,7 @@ export default function TodayPage() {
       )}
 
       {t && <TodayRoutines day={t.date} planned={t.routines} />}
+      <RecoveryCard />
     </div>
   )
 }
