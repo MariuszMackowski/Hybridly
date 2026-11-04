@@ -63,6 +63,7 @@ class ActivityDetail(ActivitySummary):
     anaerobic_te: float | None
     laps: list[LapOut]
     streams: dict
+    plan: dict | None = None  # matched planned session with comparison
 
 
 class UploadResult(BaseModel):

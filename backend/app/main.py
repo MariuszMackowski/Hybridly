@@ -5,6 +5,7 @@ from app.bodyweight.router import router as bodyweight_router
 from app.coros.router import router as coros_router
 from app.exercises.router import router as exercises_router
 from app.history import router as history_router
+from app.plans.router import router as plans_router
 from app.templates.router import router as templates_router
 from app.workouts.router import router as workouts_router
 
@@ -33,6 +34,7 @@ def create_app() -> FastAPI:
         activities_router,
         coros_router,
         history_router,
+        plans_router,
     ):
         app.include_router(router, prefix="/api")
     return app

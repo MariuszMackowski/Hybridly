@@ -70,3 +70,4 @@ class PlanSession(Base):
     )
 
     week: Mapped[PlanWeek] = relationship(back_populates="sessions")
+    plan: Mapped[TrainingPlan] = relationship()

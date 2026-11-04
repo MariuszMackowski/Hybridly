@@ -44,3 +44,32 @@ def make_workout(
     db.add(workout)
     db.flush()
     return workout
+
+
+def make_activity(
+    db: Session,
+    started_at: datetime,
+    sport: str = "run",
+    distance_m: float = 8000,
+    duration_s: int = 2800,
+    streams: dict | None = None,
+    laps: list[dict] | None = None,
+):
+    """Insert an activity row directly (no FIT file)."""
+    from app.activities.models import Activity, ActivityLap
+
+    activity = Activity(
+        source="upload",
+        sport=sport,
+        started_at=started_at,
+        duration_s=duration_s,
+        distance_m=distance_m,
+        avg_speed=distance_m / duration_s,
+        fit_sha256=f"{started_at.isoformat()}-{sport}",
+        fit_path="/nonexistent.fit",
+        streams=streams or {"t": []},
+        laps=[ActivityLap(index=i, start_offset_s=0, **lap) for i, lap in enumerate(laps or [])],
+    )
+    db.add(activity)
+    db.flush()
+    return activity

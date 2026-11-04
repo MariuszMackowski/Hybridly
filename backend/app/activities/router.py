@@ -63,8 +63,16 @@ def list_activities(
 
 @router.get("/activities/{activity_id}", response_model=ActivityDetail)
 def get_activity(activity_id: int, db: Session = Depends(get_db)):
-    """One activity with laps and streams."""
-    return _get_or_404(db, activity_id)
+    """One activity with laps, streams and the planned session it fulfilled."""
+    from app.plans.models import PlanSession
+    from app.plans.router import session_out
+
+    activity = _get_or_404(db, activity_id)
+    detail = ActivityDetail.model_validate(activity)
+    session = db.scalar(select(PlanSession).where(PlanSession.activity_id == activity.id))
+    if session is not None:
+        detail.plan = session_out(db, session).model_dump(mode="json")
+    return detail
 
 
 @router.delete("/activities/{activity_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -108,4 +108,7 @@ def store_activity(
     _apply_parsed(activity, parsed)
     db.add(activity)
     db.flush()
+    from app.plans.matching import match_activity  # local: plans depend on activities
+
+    match_activity(db, activity)
     return activity, True
