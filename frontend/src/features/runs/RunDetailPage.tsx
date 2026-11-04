@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useActivity, useDeleteActivity } from '../../api/hooks'
 import { dateTime, formatDistance, formatDuration, formatPace, speedLabel } from '../../lib/format'
+import { ComparisonView, targets } from '../plan/SessionCard'
 import RunCharts from './RunCharts'
 import RunMap from './RunMap'
 
@@ -53,6 +54,16 @@ export default function RunDetailPage() {
         <Tile label="Aerobic TE" value={a.aerobic_te} />
         <Tile label="Calories" value={a.calories} />
       </div>
+      {a.plan && (
+        <div className="card stack">
+          <div className="row spread">
+            <strong>Plan: {a.plan.title}</strong>
+            <span className="muted">{a.plan.date}</span>
+          </div>
+          <span className="muted">{targets(a.plan).join(' · ')}</span>
+          {a.plan.comparison && <ComparisonView comparison={a.plan.comparison} />}
+        </div>
+      )}
       <RunCharts streams={a.streams} isRun={isRun} />
       <RunMap streams={a.streams} />
       {a.laps.length > 0 && (

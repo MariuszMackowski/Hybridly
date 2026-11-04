@@ -170,3 +170,22 @@ summary { min-height: 32px; display: flex; align-items: center; gap: 6px; cursor
 .cal-legend { gap: 12px; font-size: 11px; justify-content: center; }
 .week-header { padding: 10px 2px 0; border-top: 1px solid var(--line); margin-top: 4px; font-size: 14px; }
 .week-header .muted { font-size: 12px; }
+
+/* Plan / Today */
+.recovery-chip { font-size: 13px; padding: 4px 8px; }
+.week-card { display: flex; flex-direction: column; gap: 8px; }
+.progress { height: 6px; background: var(--card-2); border-radius: 3px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--accent); }
+.hint { border-color: var(--accent); }
+.zone-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; }
+.zone-bar i { display: block; height: 100%; }
+.videos { display: flex; flex-direction: column; gap: 6px; }
+.video { display: flex; gap: 8px; align-items: center; background: var(--card-2); border-radius: 8px; padding: 4px; }
+.video img { width: 96px; height: 54px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+.video span { font-size: 14px; }
+.session-row { display: grid; grid-template-columns: 54px 1fr auto; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); }
+.session-row .when { font-size: 12px; color: var(--muted); }
+.st-done { color: var(--good); } .st-missed { color: var(--bad); } .st-today { color: var(--accent); } .st-upcoming { color: var(--muted); }
+textarea.mono { font-family: ui-monospace, monospace; font-size: 12px; min-height: 160px; }
+summary { flex-wrap: wrap; }
+summary > strong { white-space: nowrap; }

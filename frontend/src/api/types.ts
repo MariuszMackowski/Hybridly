@@ -191,6 +191,7 @@ export interface ActivityDetail extends ActivitySummary {
   anaerobic_te: number | null
   laps: ActivityLap[]
   streams: ActivityStreams
+  plan: PlanSession | null
 }
 
 export interface UploadResult {
@@ -232,4 +233,76 @@ export interface HistoryItem {
   exercise_count: number | null
   set_count: number | null
   pr_count: number | null
+}
+
+export interface Comparison {
+  distance_pct: number | null
+  pace_s: number | null
+  pace_status: 'in' | 'faster' | 'slower' | null
+  hr_below_pct: number | null
+  hr_in_pct: number | null
+  hr_above_pct: number | null
+  interval_laps: { index: number; distance_m: number; pace_s: number; in_range: boolean | null }[]
+}
+
+export interface PlanSession {
+  id: number
+  date: string
+  type: string
+  title: string
+  description: string
+  distance_km: number | null
+  pace_min_s: number | null
+  pace_max_s: number | null
+  hr_min: number | null
+  hr_max: number | null
+  intervals: { reps: number; distance_m?: number; pace?: { min: string; max: string }; recovery?: string } | null
+  activity_id: number | null
+  comparison: Comparison | null
+}
+
+export interface PlanWeek {
+  week: number
+  start: string
+  phase: string | null
+  flags: string[]
+  target_km: number | null
+  note: string | null
+  day_notes: { date: string; text: string }[]
+  sessions: PlanSession[]
+}
+
+export interface Plan {
+  id: number
+  name: string
+  goal: { race?: string; date?: string; target_time?: string } | null
+  notes: string[]
+  effective_from: string
+  weeks: PlanWeek[]
+}
+
+export interface Video {
+  id: number
+  url: string
+  youtube_id: string | null
+  title: string
+  thumbnail_url: string | null
+  note: string | null
+}
+
+export interface Routine {
+  id: number
+  name: string
+  note: string | null
+  video_ids: number[]
+  videos: Video[]
+}
+
+export interface TodayFull extends Today {
+  runs: PlanSession[]
+  week: { week: number; phase: string | null; flags: string[]; target_km: number | null; done_km: number } | null
+  day_notes: string[]
+  routines: { routine: Routine; done: boolean }[]
+  recovery: { recovery_pct?: number; level?: string; full_recovery_h?: number } | null
+  strength_hint: string | null
 }

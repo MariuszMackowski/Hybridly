@@ -3,6 +3,7 @@ import ExercisesPage from './features/exercises/ExercisesPage'
 import HistoryPage from './features/history/HistoryPage'
 import WorkoutDetailPage from './features/history/WorkoutDetailPage'
 import LoggerPage from './features/logger/LoggerPage'
+import PlanPage from './features/plan/PlanPage'
 import RunDetailPage from './features/runs/RunDetailPage'
 import SettingsPage from './features/settings/SettingsPage'
 import TemplateEditor from './features/templates/TemplateEditor'
@@ -12,6 +13,7 @@ import TodayPage from './features/today/TodayPage'
 const TABS = [
   { to: '/', label: 'Today' },
   { to: '/history', label: 'History' },
+  { to: '/plan', label: 'Plan' },
   { to: '/exercises', label: 'Exercises' },
   { to: '/templates', label: 'Templates' },
   { to: '/settings', label: 'Settings' },
@@ -42,6 +44,7 @@ export default function App() {
         <Route path="/history/:id" element={<WorkoutDetailPage />} />
         <Route path="/runs" element={<Navigate to="/history" replace />} />
         <Route path="/runs/:id" element={<RunDetailPage />} />
+        <Route path="/plan" element={<PlanPage />} />
         <Route path="/exercises" element={<ExercisesPage />} />
         <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/templates/:id" element={<TemplateEditor />} />

@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTemplates, useToday } from '../../api/hooks'
+import { useTemplates, useToday, useToggleRoutineDone } from '../../api/hooks'
 import type { TemplateOut } from '../../api/types'
 import { startDraft, useDraft } from '../logger/useDraft'
+import SessionCard from '../plan/SessionCard'
 
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -28,6 +29,8 @@ export default function TodayPage() {
     }
   }
 
+  const t = today.data
+  const toggle = useToggleRoutineDone()
   const planned = today.data?.template ?? null
   const others = (templates.data ?? []).filter((t) => t.id !== planned?.id)
   const startedAt = draft
@@ -36,11 +39,52 @@ export default function TodayPage() {
 
   return (
     <div className="page stack">
-      <div>
-        <h1>{today.data ? DAY_NAMES[today.data.weekday] : 'Today'}</h1>
-        <div className="muted">{today.data?.date}</div>
+      <div className="row spread">
+        <div>
+          <h1>{today.data ? DAY_NAMES[today.data.weekday] : 'Today'}</h1>
+          <div className="muted">{today.data?.date}</div>
+        </div>
+        {t?.recovery?.recovery_pct !== undefined && (
+          <span className="badge recovery-chip">Recovery {t.recovery.recovery_pct}%</span>
+        )}
       </div>
+      {t?.week && (
+        <div className="card week-card">
+          <div className="row spread">
+            <strong>
+              Week {t.week.week}
+              {t.week.phase ? ` · ${t.week.phase}` : ''}
+            </strong>
+            <span>
+              {t.week.done_km} / {t.week.target_km ?? '–'} km
+            </span>
+          </div>
+          {t.week.flags.length > 0 && (
+            <div className="chips">
+              {t.week.flags.map((f) => (
+                <span key={f} className="badge badge-pr">
+                  {f}
+                </span>
+              ))}
+            </div>
+          )}
+          {t.week.target_km ? (
+            <div className="progress">
+              <i style={{ width: `${Math.min(100, (100 * t.week.done_km) / t.week.target_km)}%` }} />
+            </div>
+          ) : null}
+        </div>
+      )}
       {error && <div className="banner">{error}</div>}
+      {(t?.day_notes ?? []).map((note) => (
+        <div key={note} className="card muted">
+          📝 {note}
+        </div>
+      ))}
+      {(t?.runs ?? []).map((run) => (
+        <SessionCard key={run.id} session={run} />
+      ))}
+      {t?.strength_hint && <div className="card hint">🏋️ {t.strength_hint}</div>}
 
       {draft ? (
         <div className="card stack">
@@ -80,6 +124,32 @@ export default function TodayPage() {
             </button>
           </div>
         </>
+      )}
+
+      {(t?.routines ?? []).length > 0 && (
+        <div className="card stack">
+          <span className="muted">Home routines</span>
+          {t!.routines.map(({ routine, done }) => (
+            <div key={routine.id} className="stack routine">
+              <label className="row check-item">
+                <input
+                  type="checkbox"
+                  checked={done}
+                  onChange={() => toggle.mutate({ routineId: routine.id, day: t!.date, done: !done })}
+                />
+                <strong>{routine.name}</strong>
+              </label>
+              <div className="videos">
+                {routine.videos.map((v) => (
+                  <a key={v.id} href={v.url} target="_blank" rel="noopener" className="video">
+                    {v.thumbnail_url && <img src={v.thumbnail_url} alt="" />}
+                    <span>{v.title}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   )

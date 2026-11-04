@@ -1,6 +1,10 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet, apiSend } from './client'
 import type {
+  Plan,
+  Routine,
+  TodayFull,
+  Video,
   HistoryItem,
   HistoryKind,
   ActivityDetail,
@@ -12,7 +16,6 @@ import type {
   ExerciseOut,
   TemplateIn,
   TemplateOut,
-  Today,
   WeekItem,
   WorkoutCreate,
   WorkoutOut,
@@ -21,7 +24,7 @@ import type {
 
 export const PAGE_SIZE = 20
 
-export const useToday = () => useQuery({ queryKey: ['today'], queryFn: () => apiGet<Today>('/today') })
+export const useToday = () => useQuery({ queryKey: ['today'], queryFn: () => apiGet<TodayFull>('/today') })
 
 export const useTemplates = () =>
   useQuery({ queryKey: ['templates'], queryFn: () => apiGet<TemplateOut[]>('/templates') })
@@ -186,3 +189,73 @@ export const useCalendar = (month: string) =>
     queryKey: ['history', 'calendar', month],
     queryFn: () => apiGet<{ day: string; kinds: string[] }[]>(`/history/calendar?month=${month}`),
   })
+
+export const useActivePlan = () =>
+  useQuery({ queryKey: ['plan'], queryFn: () => apiGet<Plan | null>('/plans/active') })
+
+export const usePlanInstructions = () =>
+  useQuery({ queryKey: ['plan', 'instructions'], queryFn: () => apiGet<{ text: string }>('/plans/instructions'), staleTime: Infinity })
+
+/** POST raw YAML (text/plain) so the backend reads the body as-is. */
+export function useImportPlan() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: async (yamlText: string) => {
+      const response = await fetch('/api/plans/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: yamlText,
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Import failed')
+      return data as { name: string; weeks: number; sessions: number; effective_from: string }
+    },
+    onSuccess: () => ['plan', 'today', 'history', 'activities'].forEach((k) => client.invalidateQueries({ queryKey: [k] })),
+  })
+}
+
+export const useLinkSession = () =>
+  useInvalidatingMutation(
+    ({ sessionId, activityId }: { sessionId: number; activityId: number | null }) =>
+      apiSend('POST', `/plans/sessions/${sessionId}/link`, { activity_id: activityId }),
+    [['plan'], ['activities'], ['today']],
+  )
+
+export const useVideos = () => useQuery({ queryKey: ['videos'], queryFn: () => apiGet<Video[]>('/videos') })
+
+export const useAddVideo = () =>
+  useInvalidatingMutation((url: string) => apiSend<Video>('POST', '/videos', { url }), [['videos']])
+
+export const useDeleteVideo = () =>
+  useInvalidatingMutation((id: number) => apiSend<void>('DELETE', `/videos/${id}`), [['videos'], ['routines']])
+
+export const useRoutines = () => useQuery({ queryKey: ['routines'], queryFn: () => apiGet<Routine[]>('/routines') })
+
+export const useSaveRoutine = () =>
+  useInvalidatingMutation(
+    ({ id, body }: { id: number | null; body: { name: string; note: string | null; video_ids: number[] } }) =>
+      id === null ? apiSend<Routine>('POST', '/routines', body) : apiSend<Routine>('PUT', `/routines/${id}`, body),
+    [['routines'], ['today']],
+  )
+
+export const useArchiveRoutine = () =>
+  useInvalidatingMutation((id: number) => apiSend<void>('POST', `/routines/${id}/archive`), [['routines'], ['today']])
+
+export const useRoutineWeek = () =>
+  useQuery({
+    queryKey: ['routines', 'week'],
+    queryFn: () => apiGet<{ weekday: number; routine_ids: number[] }[]>('/routines/week'),
+  })
+
+export const useSaveRoutineWeek = () =>
+  useInvalidatingMutation(
+    (items: { weekday: number; routine_ids: number[] }[]) => apiSend('PUT', '/routines/week', items),
+    [['routines'], ['today']],
+  )
+
+export const useToggleRoutineDone = () =>
+  useInvalidatingMutation(
+    ({ routineId, day, done }: { routineId: number; day: string; done: boolean }) =>
+      apiSend<void>(done ? 'PUT' : 'DELETE', `/routines/${routineId}/done/${day}`),
+    [['today']],
+  )
