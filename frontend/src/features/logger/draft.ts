@@ -13,7 +13,7 @@ export type DraftSet = SetValues & {
   done: boolean
   isWarmup: boolean
   previous: SetValues | null
-  suggestion: { weightKg: number; reps: number; kind: SuggestionKind } | null
+  suggestion: { weightKg: number; reps: number; kind: SuggestionKind; reason?: string | null } | null
 }
 
 export type DraftExercise = {
@@ -68,7 +68,7 @@ function buildRows(ctx: ExerciseContext, t: Targets): DraftSet[] {
   }))
   const working: DraftSet[] = Array.from({ length: t.sets }, (_, i) => {
     const s = ctx.suggestions[i]
-    const suggestion = s ? { weightKg: s.weight_kg, reps: s.reps, kind: s.kind } : null
+    const suggestion = s ? { weightKg: s.weight_kg, reps: s.reps, kind: s.kind, reason: s.reason ?? null } : null
     const previous = prevWorking[i] ?? null
     const values = suggestion
       ? { weightKg: suggestion.weightKg, reps: suggestion.reps, seconds: null }

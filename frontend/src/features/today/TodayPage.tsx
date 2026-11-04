@@ -5,6 +5,7 @@ import type { TemplateOut } from '../../api/types'
 import { startDraft, useDraft } from '../logger/useDraft'
 import SessionCard from '../plan/SessionCard'
 import TodayRoutines from './TodayRoutines'
+import RecoveryCard from '../recovery/RecoveryCard'
 
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -50,10 +51,8 @@ export default function TodayPage() {
           <h1>{today.data ? DAY_NAMES[today.data.weekday] : 'Today'}</h1>
           <div className="muted">{today.data?.date}</div>
         </div>
-        {t?.recovery?.recovery_pct !== undefined && (
-          <span className="badge recovery-chip">Recovery {t.recovery.recovery_pct}%</span>
-        )}
       </div>
+      <RecoveryCard />
       {t?.week && (
         <div className="card week-card">
           <div className="row spread">

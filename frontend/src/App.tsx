@@ -5,6 +5,7 @@ import WorkoutDetailPage from './features/history/WorkoutDetailPage'
 import LoggerPage from './features/logger/LoggerPage'
 import PlanPage from './features/plan/PlanPage'
 import RoutinesPage from './features/plan/RoutinesPage'
+import RecoveryPage from './features/recovery/RecoveryPage'
 import RunDetailPage from './features/runs/RunDetailPage'
 import SettingsPage from './features/settings/SettingsPage'
 import TemplateEditor from './features/templates/TemplateEditor'
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="/runs/:id" element={<RunDetailPage />} />
         <Route path="/plan" element={<PlanPage />} />
         <Route path="/routines" element={<RoutinesPage />} />
+        <Route path="/recovery" element={<RecoveryPage />} />
         <Route path="/exercises" element={<ExercisesPage />} />
         <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/templates/:id" element={<TemplateEditor />} />

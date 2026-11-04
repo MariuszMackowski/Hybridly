@@ -30,7 +30,7 @@ export interface PreviousSet {
 export interface ExerciseContext {
   exercise: ExerciseOut
   previous: { workout_id: number; started_at: string; sets: PreviousSet[] } | null
-  suggestions: { weight_kg: number; reps: number; kind: SuggestionKind }[]
+  suggestions: { weight_kg: number; reps: number; kind: SuggestionKind; reason?: string | null }[]
 }
 
 export interface SlotIn {
@@ -305,4 +305,14 @@ export interface TodayFull extends Today {
   routines: { routine: Routine; done: boolean }[]
   recovery: { recovery_pct?: number; level?: string; full_recovery_h?: number } | null
   strength_hint: string | null
+}
+
+export interface RecoveryState {
+  recovery_pct: number
+  hours_to_full: number
+  acute: number
+  capacity: number
+  coros_pct: number | null
+  muscles: Record<string, number>
+  daily: { day: string; strength: number; cardio: number }[]
 }

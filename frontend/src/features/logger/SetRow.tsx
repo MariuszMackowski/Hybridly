@@ -49,7 +49,7 @@ export default function SetRow(props: {
       <span className="set-prev muted">{prev}</span>
       <span className={`set-sugg ${row.suggestion ? KIND_CLASS[row.suggestion.kind] : 'muted'}`}>
         {row.suggestion
-          ? `${ARROWS[row.suggestion.kind]} ${kg(row.suggestion.weightKg)}×${row.suggestion.reps}`
+          ? `${row.suggestion.reason === 'fatigued' ? '💤' : ARROWS[row.suggestion.kind]} ${kg(row.suggestion.weightKg)}×${row.suggestion.reps}`
           : ''}
       </span>
       <NumberInput value={row.weightKg} decimal placeholder="kg" onChange={(v) => props.onChange({ weightKg: v })} />
