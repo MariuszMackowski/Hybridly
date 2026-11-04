@@ -77,3 +77,9 @@ def test_not_yaml_rejected():
 def test_instructions_contain_example_that_parses():
     example = COACH_INSTRUCTIONS.split("```yaml")[1].split("```")[0]
     assert parse_plan_yaml(example).weeks
+
+
+def test_unquoted_pace_is_accepted():
+    plan = parse_plan_yaml(PLAN.replace('{min: "5:40", max: "6:20"}', "{min: 5:40, max: 6:20}"))
+    assert plan.weeks[0].sessions[0].pace.min_s == 340
+    assert plan.weeks[0].sessions[0].pace.min == "5:40"

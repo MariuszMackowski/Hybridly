@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
@@ -11,7 +11,7 @@ from app.plans import matching
 from app.plans.compare import Comparison, compare
 from app.plans.format import COACH_INSTRUCTIONS, PlanFormatError
 from app.plans.models import PlanSession, PlanWeek, TrainingPlan
-from app.plans.service import import_plan
+from app.plans.service import import_plan, sessions_on
 from app.time import local_today
 
 router = APIRouter(prefix="/plans", tags=["plans"])
@@ -95,6 +95,27 @@ async def import_plan_endpoint(request: Request, db: Session = Depends(get_db)) 
     }
 
 
+def _week_sessions(db: Session, plan: TrainingPlan, week: PlanWeek) -> list[PlanSession]:
+    """Sessions per day from the plan in effect that day (older plan before effective_from)."""
+    if week.start >= plan.effective_from:
+        return list(week.sessions)
+    result: list[PlanSession] = []
+    for offset in range(7):
+        day = week.start + timedelta(days=offset)
+        if day < plan.effective_from:
+            result += sessions_on(db, day)
+        else:
+            result += [s for s in week.sessions if s.date == day]
+    return result
+
+
+@router.get("/sessions", response_model=list[SessionOut])
+def sessions_between(start: date, end: date, db: Session = Depends(get_db)):
+    """Planned sessions in effect between two dates (inclusive) — for manual linking."""
+    days = [start + timedelta(days=i) for i in range((end - start).days + 1)][:31]
+    return [session_out(db, s) for day in days for s in sessions_on(db, day)]
+
+
 @router.get("/active", response_model=PlanOut | None)
 def active_plan(db: Session = Depends(get_db)):
     """The plan in effect today (or the newest one if none applies yet)."""
@@ -126,7 +147,7 @@ def active_plan(db: Session = Depends(get_db)):
                     for k in ("week", "start", "phase", "flags", "target_km", "note")
                 },
                 day_notes=w.day_notes or [],
-                sessions=[session_out(db, s) for s in w.sessions],
+                sessions=[session_out(db, s) for s in _week_sessions(db, plan, w)],
             )
             for w in weeks
         ],

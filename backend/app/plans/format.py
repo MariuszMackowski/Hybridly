@@ -36,6 +36,14 @@ class PaceRange(BaseModel):
     min: str
     max: str
 
+    @field_validator("min", "max", mode="before")
+    @classmethod
+    def _sexagesimal(cls, value):
+        """Unquoted 5:40 is read by YAML 1.1 as 340 (base 60); turn it back into "5:40"."""
+        if isinstance(value, int) and not isinstance(value, bool):
+            return f"{value // 60}:{value % 60:02d}"
+        return value
+
     @property
     def min_s(self) -> int:
         """Faster end in seconds."""

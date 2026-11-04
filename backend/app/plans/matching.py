@@ -33,20 +33,54 @@ def _free_session(db: Session, day: date, activity: Activity | None = None) -> P
     )
 
 
-def match_activity(db: Session, activity: Activity) -> PlanSession | None:
-    """Same-day session first, else the day before, else the day after."""
+def _distance_error(session: PlanSession, activity: Activity) -> float:
+    """How far a run's distance is from the plan (0 when unknown)."""
+    if not session.distance_km or not activity.distance_m:
+        return 0.0
+    return abs(activity.distance_m - session.distance_km * 1000)
+
+
+def _claim(db: Session, session: PlanSession, activity: Activity) -> PlanSession:
+    """Give the session to the activity and re-home whoever held it (without stealing)."""
+    previous = session.activity_id
+    session.activity_id = activity.id
+    db.flush()
+    if previous is not None and previous != activity.id:
+        displaced = db.get(Activity, previous)
+        if displaced is not None:
+            match_activity(db, displaced, allow_steal=False)
+    return session
+
+
+def _same_day_contested(db: Session, day: date, activity: Activity) -> PlanSession | None:
+    """A same-day session held by a neighbour-day run, or by a same-day run further from plan."""
+    for session in sessions_on(db, day):
+        holder = db.get(Activity, session.activity_id) if session.activity_id else None
+        if holder is None:
+            continue
+        if local_date(holder.started_at) != day:
+            return session
+        if _distance_error(session, activity) < _distance_error(session, holder):
+            return session
+    return None
+
+
+def match_activity(db: Session, activity: Activity, allow_steal: bool = True) -> PlanSession | None:
+    """Same-day session first (may take it back from a worse holder), else day before/after."""
     if activity.sport != "run":
         return None
     if db.scalar(select(PlanSession.id).where(PlanSession.activity_id == activity.id)):
         return None
     day = local_date(activity.started_at)
-    for offset in (0, -1, 1):
-        candidate = day + timedelta(days=offset)
-        session = _free_session(db, candidate, activity if offset else None)
+    session = _free_session(db, day)
+    if session is None and allow_steal:
+        session = _same_day_contested(db, day, activity)
+    if session is not None:
+        return _claim(db, session, activity)
+    for offset in (-1, 1):
+        session = _free_session(db, day + timedelta(days=offset), activity)
         if session is not None:
-            session.activity_id = activity.id
-            db.flush()
-            return session
+            return _claim(db, session, activity)
     return None
 
 

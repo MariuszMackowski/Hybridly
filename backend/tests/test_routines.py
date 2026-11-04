@@ -62,3 +62,8 @@ def test_routine_week_and_done_log(client, monkeypatch):
     assert done == [routine["id"]]
     client.delete(f"/api/routines/{routine['id']}/done/2026-01-05")
     assert client.get("/api/routines/done?day=2026-01-05").json() == []
+
+
+def test_duplicate_routine_name_returns_409(client):
+    client.post("/api/routines", json={"name": "Core", "video_ids": []})
+    assert client.post("/api/routines", json={"name": "Core", "video_ids": []}).status_code == 409

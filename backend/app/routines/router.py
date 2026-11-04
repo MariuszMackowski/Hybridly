@@ -129,7 +129,10 @@ def list_routines(db: Session = Depends(get_db)):
 
 
 def _save(db: Session, routine: Routine, data: RoutineIn) -> RoutineOut:
-    """Write fields and return the serialized routine."""
+    """Write fields and return the serialized routine (409 on a name clash)."""
+    clash = db.scalar(select(Routine.id).where(Routine.name == data.name, Routine.id != routine.id))
+    if clash is not None:
+        raise HTTPException(status.HTTP_409_CONFLICT, f"Routine name already used: {data.name}")
     routine.name, routine.note, routine.video_ids = data.name, data.note, data.video_ids
     db.add(routine)
     db.commit()

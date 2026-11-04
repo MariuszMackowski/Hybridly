@@ -186,3 +186,38 @@ def test_same_day_match_ignores_distance(db_session):
     long_one = make_activity(db_session, _at(MON), distance_m=30000)
     match_activity(db_session, long_one)
     assert sessions_on(db_session, MON)[0].activity_id == long_one.id
+
+
+def test_extra_run_day_before_does_not_steal_planned_run(db_session):
+    import_plan(db_session, plan_yaml("A", MON), today=MON)
+    extra = make_activity(db_session, _at(date(2026, 1, 8)))  # Thursday, nothing planned
+    match_activity(db_session, extra)
+    real = make_activity(db_session, _at(date(2026, 1, 9)))  # Friday intervals
+    match_activity(db_session, real)
+    friday = sessions_on(db_session, date(2026, 1, 9))[0]
+    assert friday.activity_id == real.id
+
+
+def test_same_day_prefers_run_closest_to_planned_distance(db_session):
+    import_plan(db_session, plan_yaml("A", MON), today=MON)
+    warmup = make_activity(db_session, _at(MON, 7), distance_m=2000)
+    match_activity(db_session, warmup)
+    main = make_activity(db_session, _at(MON, 18), distance_m=8100)
+    match_activity(db_session, main)
+    assert sessions_on(db_session, MON)[0].activity_id == main.id
+
+
+def test_plan_view_keeps_old_plan_days_before_effective_date(client, db_session):
+    import_plan(db_session, plan_yaml("A", MON, weeks=3), today=MON)
+    run = make_activity(db_session, _at(date(2026, 1, 12)))
+    match_activity(db_session, run)
+    import_plan(db_session, plan_yaml("B", date(2026, 1, 12), weeks=2), today=date(2026, 1, 14))
+    weeks = client.get("/api/plans/active").json()["weeks"]
+    monday = next(s for w in weeks for s in w["sessions"] if s["date"] == "2026-01-12")
+    assert monday["activity_id"] == run.id
+
+
+def test_sessions_near_lists_candidates(client, db_session):
+    import_plan(db_session, plan_yaml("A", MON), today=MON)
+    sessions = client.get("/api/plans/sessions?start=2026-01-08&end=2026-01-11").json()
+    assert [s["date"] for s in sessions] == ["2026-01-09", "2026-01-11"]
