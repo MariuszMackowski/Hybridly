@@ -1,0 +1,72 @@
+"""Starting exercise database: every exercise found in the user's Gravitus history."""
+
+from app.exercises.schemas import ExerciseIn
+
+# name, primary, secondary, load_factor, increment_kg, flags (bw = bodyweight, side, time)
+_ROWS: list[tuple[str, str, str, float, float, str]] = [
+    ("Bench Press", "chest", "front_delts triceps", 1.5, 2.5, ""),
+    ("Incline Bench Press", "chest", "front_delts triceps", 1.5, 2.5, ""),
+    ("Decline Bench Press", "chest", "triceps", 1.5, 2.5, ""),
+    ("Dumbbell Bench Press", "chest", "front_delts triceps", 1.2, 2, ""),
+    ("Incline Dumbbell Press", "chest", "front_delts triceps", 1.2, 2, ""),
+    ("Chest Press Machine", "chest", "front_delts triceps", 1.2, 2.5, ""),
+    ("Hammer Strength Iso Lateral Bench Press", "chest", "front_delts triceps", 1.2, 2.5, ""),
+    ("Dumbbell Fly", "chest", "front_delts", 0.8, 2, ""),
+    ("Flat Bench Dumbells Flys", "chest", "front_delts", 0.8, 2, ""),
+    ("Machine Fly", "chest", "", 0.8, 2.5, ""),
+    ("Pec Deck", "chest", "", 0.8, 2.5, ""),
+    ("Overhead Press", "front_delts", "side_delts triceps", 1.5, 2.5, ""),
+    ("Dumbbell Shoulder Press", "front_delts", "side_delts triceps", 1.2, 2, ""),
+    ("Dumbbell Lateral Raise", "side_delts", "", 0.8, 1, ""),
+    ("Rear Delt Machine", "rear_delts", "upper_back", 0.8, 2.5, ""),
+    ("Face Pull", "rear_delts", "upper_back", 0.8, 2.5, ""),
+    ("Pull-Up", "lats", "biceps upper_back", 1.2, 2.5, "bw"),
+    ("Lat Pulldown", "lats", "biceps upper_back", 1.2, 2.5, ""),
+    ("Fixed Pulldown", "lats", "biceps", 1.2, 2.5, ""),
+    ("Barbell Row", "upper_back lats", "rear_delts biceps lower_back", 1.5, 2.5, ""),
+    ("Seated Cable Row", "upper_back lats", "biceps rear_delts", 1.2, 2.5, ""),
+    ("Machine Row", "upper_back lats", "biceps", 1.2, 2.5, ""),
+    ("Machine Iso-Lateral Row", "upper_back lats", "biceps", 1.2, 2.5, ""),
+    ("Dead Hang", "forearms", "lats", 0.5, 0, "bw time"),
+    ("Farmer’s Carry", "forearms upper_back", "abs", 1.0, 2, "time"),
+    ("Barbell Curl", "biceps", "forearms", 0.8, 2.5, ""),
+    ("Dumbbell Curl", "biceps", "forearms", 0.8, 1, ""),
+    ("Skull Crusher", "triceps", "", 0.8, 2.5, ""),
+    ("Pushdown", "triceps", "", 0.8, 2.5, ""),
+    ("Rope Pushdown", "triceps", "", 0.8, 2.5, ""),
+    ("Squat", "quads glutes", "adductors lower_back", 1.5, 2.5, ""),
+    ("Leg Press", "quads glutes", "adductors", 1.2, 5, ""),
+    ("Single-Leg Press", "quads glutes", "", 1.2, 2.5, "side"),
+    ("Leg Extension", "quads", "", 0.8, 2.5, ""),
+    ("Bulgarian Split Squat", "quads glutes", "adductors hamstrings", 1.2, 2, "side"),
+    ("Dumbbell Lunge", "quads glutes", "hamstrings", 1.2, 2, "side"),
+    ("Box Step Downs", "quads", "glutes", 1.0, 2, "side"),
+    ("Deadlift", "hamstrings glutes lower_back", "upper_back forearms quads", 1.5, 2.5, ""),
+    ("Romanian Deadlift", "hamstrings glutes", "lower_back", 1.5, 2.5, ""),
+    ("Single-Leg Romanian Deadlift", "hamstrings glutes", "lower_back", 1.2, 2, "side"),
+    ("Glute Drive", "glutes", "hamstrings", 1.2, 5, ""),
+    ("Standing Calf Raise", "calves", "", 0.8, 2.5, ""),
+    ("Standing Smith Machine Calf Raise", "calves", "", 0.8, 2.5, ""),
+    ("Seated Calf Raise", "calves", "", 0.8, 2.5, ""),
+    ("Tibialis Raise", "tibialis", "", 0.5, 1, ""),
+    ("Abdominal Crunch Machine", "abs", "", 0.8, 2.5, ""),
+    ("Weighted Crunches", "abs", "", 0.8, 2.5, ""),
+    ("Decline Plate-Weighted Crunch", "abs", "", 0.8, 2.5, ""),
+    ("Leg Pull In", "abs", "", 0.8, 0, "bw"),
+    ("Rusian Twist", "obliques", "abs", 0.5, 1, ""),
+    ("Weighted Russian Twist", "obliques", "abs", 0.8, 1, ""),
+]
+
+CATALOG: list[ExerciseIn] = [
+    ExerciseIn(
+        name=name,
+        primary_muscles=primary.split(),
+        secondary_muscles=secondary.split(),
+        load_factor=load_factor,
+        increment_kg=increment,
+        is_bodyweight="bw" in flags.split(),
+        per_side="side" in flags.split(),
+        measure="time" if "time" in flags.split() else "reps",
+    )
+    for name, primary, secondary, load_factor, increment, flags in _ROWS
+]
