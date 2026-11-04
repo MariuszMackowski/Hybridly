@@ -47,7 +47,10 @@ Aerobic TE: 2.3
 Anaerobic TE: 0.9
 """
 
-RECOVERY = "Recovery Status\n========================\n\nRecovery: 85%\nLevel: Fresh\nEstimated Full Recovery: 6h"
+RECOVERY = (
+    "Recovery Status\n========================\n\n"
+    "Recovery: 85%\nLevel: Fresh\nEstimated Full Recovery: 6h"
+)
 
 LOAD = """Training Load Assessment
 ========================
