@@ -30,6 +30,8 @@ class ParsedLap:
     max_hr: int | None
     avg_speed: float | None
     avg_cadence_spm: int | None
+    avg_power_w: int | None = None
+    avg_stride_m: float | None = None
 
 
 @dataclass
@@ -46,6 +48,11 @@ class ParsedFit:
     ascent_m: float | None
     calories: int | None
     avg_cadence_spm: int | None
+    avg_stride_m: float | None = None
+    avg_power_w: int | None = None
+    avg_gct_ms: float | None = None
+    avg_vo_cm: float | None = None
+    avg_vr_pct: float | None = None
     laps: list[ParsedLap] = field(default_factory=list)
     streams: dict[str, list] = field(default_factory=dict)
 
@@ -75,6 +82,11 @@ def _spm(cadence) -> int | None:
     return int(round(cadence * 2)) if cadence is not None else None
 
 
+def _scaled(value, factor: float, digits: int = 2):
+    """Unit conversion that keeps None (mm → m, mm → cm)."""
+    return round(value * factor, digits) if value is not None else None
+
+
 def _messages(data: bytes) -> dict[str, list]:
     """Group FIT data messages by name."""
     groups: dict[str, list] = {"record": [], "lap": [], "session": []}
@@ -92,7 +104,8 @@ def _messages(data: bytes) -> dict[str, list]:
 
 def _streams(records: list, start: datetime) -> dict[str, list]:
     """Downsample 1 Hz records to one point per STREAM_STEP_S; drop channels with no data."""
-    channels = {"t": [], "hr": [], "speed": [], "alt": [], "lat": [], "lon": [], "cad": []}
+    names = ("t", "hr", "speed", "alt", "lat", "lon", "cad", "stride", "power", "gct", "vo", "vr")
+    channels: dict[str, list] = {name: [] for name in names}
     next_t = 0
     for rec in records:
         ts = _get(rec, "timestamp")
@@ -110,6 +123,11 @@ def _streams(records: list, start: datetime) -> dict[str, list]:
         channels["lat"].append(round(lat * SEMICIRCLE, 6) if lat is not None else None)
         channels["lon"].append(round(lon * SEMICIRCLE, 6) if lon is not None else None)
         channels["cad"].append(_spm(_get(rec, "cadence")))
+        channels["stride"].append(_scaled(_get(rec, "step_length"), 0.001))
+        channels["power"].append(_get(rec, "power"))
+        channels["gct"].append(_get(rec, "stance_time"))
+        channels["vo"].append(_scaled(_get(rec, "vertical_oscillation"), 0.1, 1))
+        channels["vr"].append(_get(rec, "vertical_ratio"))
     return {k: v for k, v in channels.items() if k == "t" or any(x is not None for x in v)}
 
 
@@ -128,6 +146,8 @@ def _laps(laps: list, start: datetime) -> list[ParsedLap]:
                 max_hr=_get(lap, "max_heart_rate"),
                 avg_speed=_get(lap, "enhanced_avg_speed", "avg_speed"),
                 avg_cadence_spm=_spm(_get(lap, "avg_running_cadence", "avg_cadence")),
+                avg_power_w=_get(lap, "avg_power"),
+                avg_stride_m=_scaled(_get(lap, "avg_step_length"), 0.001),
             )
         )
     return result
@@ -149,6 +169,11 @@ def parse_fit(data: bytes) -> ParsedFit:
         ascent_m=_get(session, "total_ascent"),
         calories=_get(session, "total_calories"),
         avg_cadence_spm=_spm(_get(session, "avg_running_cadence", "avg_cadence")),
+        avg_stride_m=_scaled(_get(session, "avg_step_length"), 0.001),
+        avg_power_w=_get(session, "avg_power"),
+        avg_gct_ms=_get(session, "avg_stance_time"),
+        avg_vo_cm=_scaled(_get(session, "avg_vertical_oscillation"), 0.1, 1),
+        avg_vr_pct=_get(session, "avg_vertical_ratio"),
         laps=_laps(groups["lap"], start),
         streams=_streams(groups["record"], start),
     )

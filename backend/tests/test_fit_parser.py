@@ -56,3 +56,32 @@ def test_sha256_is_stable():
     data = make_fit()
     assert fit_sha256(data) == fit_sha256(bytes(data))
     assert len(fit_sha256(data)) == 64
+
+
+def test_running_dynamics_summary():
+    parsed = parse_fit(make_fit())
+    assert parsed.avg_stride_m == pytest.approx(1.1)
+    assert parsed.avg_power_w == 230
+    assert parsed.avg_gct_ms == pytest.approx(260)
+    assert parsed.avg_vo_cm == pytest.approx(9.5)
+    assert parsed.avg_vr_pct == pytest.approx(8.6)
+
+
+def test_running_dynamics_streams():
+    streams = parse_fit(make_fit()).streams
+    assert streams["stride"][0] == pytest.approx(1.1)
+    assert streams["power"][0] == 230
+    assert streams["gct"][0] == pytest.approx(260)
+    assert streams["vo"][0] == pytest.approx(9.5)
+
+
+def test_lap_power_and_stride():
+    lap = parse_fit(make_fit(laps=2)).laps[1]
+    assert lap.avg_power_w == 221
+    assert lap.avg_stride_m == pytest.approx(1.05)
+
+
+def test_no_dynamics_channels_without_data():
+    parsed = parse_fit(make_fit(with_dynamics=False))
+    assert parsed.avg_power_w is None
+    assert "power" not in parsed.streams and "stride" not in parsed.streams

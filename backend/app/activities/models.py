@@ -31,6 +31,11 @@ class Activity(Base):
     ascent_m: Mapped[float | None]
     calories: Mapped[int | None]
     avg_cadence_spm: Mapped[int | None]
+    avg_stride_m: Mapped[float | None]
+    avg_power_w: Mapped[int | None]
+    avg_gct_ms: Mapped[float | None]
+    avg_vo_cm: Mapped[float | None]
+    avg_vr_pct: Mapped[float | None]
     training_load: Mapped[int | None]
     aerobic_te: Mapped[float | None]
     anaerobic_te: Mapped[float | None]
@@ -58,5 +63,7 @@ class ActivityLap(Base):
     max_hr: Mapped[int | None]
     avg_speed: Mapped[float | None]
     avg_cadence_spm: Mapped[int | None]
+    avg_power_w: Mapped[int | None]
+    avg_stride_m: Mapped[float | None]
 
     activity: Mapped[Activity] = relationship(back_populates="laps")

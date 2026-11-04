@@ -26,6 +26,7 @@ def make_fit(
     with_hr: bool = True,
     speed: float = 3.0,
     start: datetime = START,
+    with_dynamics: bool = True,
 ) -> bytes:
     """1 Hz records at constant speed, equal laps, one session."""
     builder = FitFileBuilder(auto_define=True, min_string_size=50)
@@ -46,6 +47,12 @@ def make_fit(
         rec.cadence = 80
         if with_hr:
             rec.heart_rate = 130 + (t * 20 // seconds)
+        if with_dynamics:
+            rec.step_length = 1100.0
+            rec.power = 230
+            rec.stance_time = 260.0
+            rec.vertical_oscillation = 95.0
+            rec.vertical_ratio = 8.6
         if with_gps:
             rec.position_lat = 10.0 + t * 1e-5
             rec.position_long = 20.0 + t * 1e-5
@@ -64,6 +71,9 @@ def make_fit(
             lap.avg_heart_rate = 135 + i
             lap.max_heart_rate = 150 + i
         lap.avg_running_cadence = 80
+        if with_dynamics:
+            lap.avg_power = 220 + i
+            lap.avg_step_length = 1050.0
         builder.add(lap)
 
     session = SessionMessage()
@@ -77,6 +87,12 @@ def make_fit(
     session.total_ascent = 25
     session.total_calories = 120
     session.avg_running_cadence = 80
+    if with_dynamics:
+        session.avg_step_length = 1100.0
+        session.avg_power = 230
+        session.avg_stance_time = 260.0
+        session.avg_vertical_oscillation = 95.0
+        session.avg_vertical_ratio = 8.6
     if with_hr:
         session.avg_heart_rate = 140
         session.max_heart_rate = 150

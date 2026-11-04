@@ -5,7 +5,7 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.activities.fit_parser import ParsedFit, fit_sha256
+from app.activities.fit_parser import ParsedFit, fit_sha256, parse_fit
 from app.activities.models import Activity, ActivityLap
 from app.config import get_settings
 
@@ -27,6 +27,44 @@ def _save_file(data: bytes, digest: str) -> str:
     if not path.exists():
         path.write_bytes(data)
     return str(path)
+
+
+SUMMARY_FIELDS = (
+    "started_at",
+    "duration_s",
+    "distance_m",
+    "avg_hr",
+    "max_hr",
+    "avg_speed",
+    "ascent_m",
+    "calories",
+    "avg_cadence_spm",
+    "avg_stride_m",
+    "avg_power_w",
+    "avg_gct_ms",
+    "avg_vo_cm",
+    "avg_vr_pct",
+    "streams",
+)
+
+
+def _apply_parsed(activity: Activity, parsed: ParsedFit) -> None:
+    """Copy FIT-derived summary, streams and laps onto an activity (COROS fields untouched)."""
+    for name in SUMMARY_FIELDS:
+        setattr(activity, name, getattr(parsed, name))
+    activity.laps = [ActivityLap(**vars(lap)) for lap in parsed.laps]
+
+
+def reparse_all(db: Session) -> int:
+    """Re-read every stored FIT file (after the parser learns new fields); returns count."""
+    count = 0
+    for activity in db.scalars(select(Activity)):
+        path = Path(activity.fit_path)
+        if path.exists():
+            _apply_parsed(activity, parse_fit(path.read_bytes()))
+            count += 1
+    db.commit()
+    return count
 
 
 def _find_existing(db: Session, digest: str, parsed: ParsedFit) -> Activity | None:
@@ -63,21 +101,11 @@ def store_activity(
         sport=sport,
         sport_type=sport_type,
         name=name,
-        started_at=parsed.started_at,
-        duration_s=parsed.duration_s,
-        distance_m=parsed.distance_m,
-        avg_hr=parsed.avg_hr,
-        max_hr=parsed.max_hr,
-        avg_speed=parsed.avg_speed,
-        ascent_m=parsed.ascent_m,
-        calories=parsed.calories,
-        avg_cadence_spm=parsed.avg_cadence_spm,
         fit_sha256=digest,
         fit_path=_save_file(data, digest),
-        streams=parsed.streams,
-        laps=[ActivityLap(**vars(lap)) for lap in parsed.laps],
         **(extras or {}),
     )
+    _apply_parsed(activity, parsed)
     db.add(activity)
     db.flush()
     return activity, True

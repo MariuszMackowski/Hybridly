@@ -99,3 +99,28 @@ def test_upload_unexpected_parse_failure_reports_error(client, monkeypatch):
     monkeypatch.setattr("app.activities.router.parse_fit", broken)
     result = _upload(client, ("odd.fit", make_fit())).json()
     assert result[0]["status"] == "error"
+
+
+def test_detail_includes_running_dynamics(client):
+    activity_id = _upload(client, ("r.fit", make_fit())).json()[0]["id"]
+    body = client.get(f"/api/activities/{activity_id}").json()
+    assert body["avg_stride_m"] == pytest.approx(1.1)
+    assert body["avg_power_w"] == 230
+    assert body["laps"][0]["avg_power_w"] == 220
+    assert "power" in body["streams"]
+
+
+def test_reparse_refreshes_stored_activity(client, db_session):
+    from app.activities.service import reparse_all
+
+    activity_id = _upload(client, ("r.fit", make_fit())).json()[0]["id"]
+    activity = db_session.get(Activity, activity_id)
+    activity.avg_power_w = None
+    activity.streams = {"t": []}
+    activity.training_load = 77
+    db_session.flush()
+    assert reparse_all(db_session) == 1
+    db_session.refresh(activity)
+    assert activity.avg_power_w == 230
+    assert len(activity.streams["t"]) > 10
+    assert activity.training_load == 77

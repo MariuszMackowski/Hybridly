@@ -4,6 +4,7 @@ from pathlib import Path
 import typer
 
 import app.models_registry  # noqa: F401
+from app.activities.service import reparse_all
 from app.db import SessionLocal
 from app.exercises.service import upsert_catalog
 from app.imports.gravitus.importer import import_gravitus
@@ -25,6 +26,13 @@ def import_gravitus_cmd(path: Path) -> None:
         report = import_gravitus(db, path.read_text(encoding="utf-8"))
     for key, value in asdict(report).items():
         typer.echo(f"{key}: {value}")
+
+
+@cli.command("reparse-activities")
+def reparse_activities() -> None:
+    """Re-read stored FIT files to fill fields added to the parser."""
+    with SessionLocal() as db:
+        typer.echo(f"activities reparsed: {reparse_all(db)}")
 
 
 if __name__ == "__main__":

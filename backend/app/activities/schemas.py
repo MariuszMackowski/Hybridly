@@ -41,6 +41,8 @@ class LapOut(BaseModel):
     max_hr: int | None
     avg_speed: float | None
     avg_cadence_spm: int | None
+    avg_power_w: int | None = None
+    avg_stride_m: float | None = None
 
 
 class ActivityDetail(ActivitySummary):
@@ -52,6 +54,11 @@ class ActivityDetail(ActivitySummary):
     ascent_m: float | None
     calories: int | None
     avg_cadence_spm: int | None
+    avg_stride_m: float | None
+    avg_power_w: int | None
+    avg_gct_ms: float | None
+    avg_vo_cm: float | None
+    avg_vr_pct: float | None
     aerobic_te: float | None
     anaerobic_te: float | None
     laps: list[LapOut]
