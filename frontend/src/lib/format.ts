@@ -42,3 +42,9 @@ export function formatPace(secondsPerKm: number | null): string {
 export function formatDistance(meters: number | null): string {
   return meters === null ? '–' : `${(meters / 1000).toFixed(2)} km`
 }
+
+/** Pace for runs, km/h for everything else. */
+export function speedLabel(a: { sport: string; avg_pace_s_per_km: number | null; avg_speed: number | null }): string {
+  if (a.sport === 'run') return `${formatPace(a.avg_pace_s_per_km)} /km`
+  return a.avg_speed ? `${(a.avg_speed * 3.6).toFixed(1)} km/h` : '–'
+}

@@ -214,3 +214,22 @@ export interface CorosStatus {
   } | null
   redirect_uri: string
 }
+
+export type HistoryKind = 'all' | 'gym' | 'run' | 'walk' | 'other'
+
+export interface HistoryItem {
+  kind: 'workout' | 'activity'
+  id: number
+  started_at: string
+  title: string | null
+  sport: string
+  duration_s: number | null
+  distance_m: number | null
+  avg_pace_s_per_km: number | null
+  avg_speed: number | null
+  avg_hr: number | null
+  training_load: number | null
+  exercise_count: number | null
+  set_count: number | null
+  pr_count: number | null
+}

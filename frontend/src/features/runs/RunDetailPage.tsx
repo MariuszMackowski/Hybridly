@@ -1,9 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useActivity, useDeleteActivity } from '../../api/hooks'
-import { dateTime, formatDistance, formatDuration, formatPace } from '../../lib/format'
+import { dateTime, formatDistance, formatDuration, formatPace, speedLabel } from '../../lib/format'
 import RunCharts from './RunCharts'
 import RunMap from './RunMap'
-import { speedLabel } from './RunsPage'
 
 /** One labelled number. */
 function Tile(props: { label: string; value: string | number | null }) {
@@ -28,8 +27,8 @@ export default function RunDetailPage() {
 
   return (
     <div className="page stack">
-      <button className="btn-small" style={{ alignSelf: 'flex-start' }} onClick={() => navigate('/runs')}>
-        ‹ Runs
+      <button className="btn-small" style={{ alignSelf: 'flex-start' }} onClick={() => navigate('/history')}>
+        ‹ History
       </button>
       <div>
         <h1>{a.name ?? a.sport}</h1>
@@ -98,7 +97,7 @@ export default function RunDetailPage() {
         disabled={remove.isPending}
         onClick={() =>
           window.confirm('Delete this activity?') &&
-          remove.mutate(a.id, { onSuccess: () => navigate('/runs', { replace: true }) })
+          remove.mutate(a.id, { onSuccess: () => navigate('/history', { replace: true }) })
         }
       >
         Delete activity

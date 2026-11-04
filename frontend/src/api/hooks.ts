@@ -1,8 +1,9 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet, apiSend } from './client'
 import type {
+  HistoryItem,
+  HistoryKind,
   ActivityDetail,
-  ActivitySummary,
   CorosStatus,
   UploadResult,
   BodyweightEntry,
@@ -79,10 +80,11 @@ function useInvalidatingMutation<TVars, TResult>(
 export const useSaveWorkout = () =>
   useInvalidatingMutation((body: WorkoutCreate) => apiSend<WorkoutOut>('POST', '/workouts', body), [
     ['workouts'],
+    ['history'],
   ])
 
 export const useDeleteWorkout = () =>
-  useInvalidatingMutation((id: number) => apiSend<void>('DELETE', `/workouts/${id}`), [['workouts']])
+  useInvalidatingMutation((id: number) => apiSend<void>('DELETE', `/workouts/${id}`), [['workouts'], ['history']])
 
 export const useSaveExercise = () =>
   useInvalidatingMutation(
@@ -126,12 +128,6 @@ export const useSaveBodyweight = () =>
     [['bodyweight'], ['workouts']],
   )
 
-export const useActivities = (sport: string | null) =>
-  useQuery({
-    queryKey: ['activities', sport],
-    queryFn: () => apiGet<ActivitySummary[]>(`/activities?limit=200${sport ? `&sport=${sport}` : ''}`),
-  })
-
 export const useActivity = (id: number) =>
   useQuery({ queryKey: ['activities', 'detail', id], queryFn: () => apiGet<ActivityDetail>(`/activities/${id}`) })
 
@@ -146,12 +142,15 @@ export function useUploadFit() {
       if (!response.ok) throw new Error(`Upload failed (${response.status})`)
       return (await response.json()) as UploadResult[]
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: ['activities'] }),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ['activities'] })
+      client.invalidateQueries({ queryKey: ['history'] })
+    },
   })
 }
 
 export const useDeleteActivity = () =>
-  useInvalidatingMutation((id: number) => apiSend<void>('DELETE', `/activities/${id}`), [['activities']])
+  useInvalidatingMutation((id: number) => apiSend<void>('DELETE', `/activities/${id}`), [['activities'], ['history']])
 
 export const useCorosStatus = () =>
   useQuery({
@@ -170,3 +169,12 @@ export const useCorosComplete = () =>
 
 export const useCorosSync = () =>
   useInvalidatingMutation(() => apiSend<{ status: string }>('POST', '/coros/sync'), [['coros']])
+
+export const useHistory = (kind: HistoryKind) =>
+  useInfiniteQuery({
+    queryKey: ['history', kind],
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
+      apiGet<HistoryItem[]>(`/history?kind=${kind}&limit=${PAGE_SIZE}&offset=${pageParam}`),
+    getNextPageParam: (last, pages) => (last.length < PAGE_SIZE ? undefined : pages.length * PAGE_SIZE),
+  })

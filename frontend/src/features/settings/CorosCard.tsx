@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
 import { useCorosComplete, useCorosConnect, useCorosStatus, useCorosSync } from '../../api/hooks'
 import { dateTime } from '../../lib/format'
 
@@ -11,6 +12,13 @@ export default function CorosCard() {
   const [pasted, setPasted] = useState('')
   const [authUrl, setAuthUrl] = useState<string | null>(null)
   const s = status.data
+  const client = useQueryClient()
+  const wasSyncing = useRef(false)
+  useEffect(() => {
+    // A finished sync may have added activities: refresh the lists.
+    if (wasSyncing.current && s && !s.syncing) client.invalidateQueries({ queryKey: ['history'] })
+    wasSyncing.current = !!s?.syncing
+  }, [s, client])
   const last = s?.last_sync_status
   const connected = s?.status === 'connected'
 
