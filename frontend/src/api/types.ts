@@ -1,5 +1,5 @@
 export type SuggestionKind = 'increase' | 'hold' | 'reduce'
-export type Measure = 'reps' | 'time'
+export type Measure = 'reps' | 'time' | 'distance'
 export type Block = 'main' | 'finisher'
 
 export interface ExerciseIn {
@@ -24,6 +24,7 @@ export interface PreviousSet {
   weight_kg: number | null
   reps: number | null
   seconds: number | null
+  distance_m: number | null
   is_warmup: boolean
 }
 
@@ -81,6 +82,7 @@ export interface SetIn {
   weight_kg: number | null
   reps: number | null
   seconds: number | null
+  distance_m: number | null
   is_warmup: boolean
 }
 

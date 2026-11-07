@@ -12,7 +12,7 @@ class ExerciseIn(BaseModel):
     aliases: list[str] = []
     primary_muscles: list[Muscle]
     secondary_muscles: list[Muscle] = []
-    measure: Literal["reps", "time"] = "reps"
+    measure: Literal["reps", "time", "distance"] = "reps"
     load_factor: float = Field(default=1.0, ge=0)
     increment_kg: float = Field(default=2.5, ge=0)
     is_bodyweight: bool = False

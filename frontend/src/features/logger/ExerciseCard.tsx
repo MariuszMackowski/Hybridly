@@ -1,4 +1,5 @@
 import type { DraftExercise, DraftSet, SetValues } from './draft'
+import { MEASURE_UNIT } from '../../lib/format'
 import SetRow from './SetRow'
 
 export type CardActions = {
@@ -48,7 +49,7 @@ export default function ExerciseCard(props: { group: DraftExercise[]; actions: C
         <span>Prev</span>
         <span>Next</span>
         <span>kg</span>
-        <span>{group[0].measure === 'time' ? 's' : 'reps'}</span>
+        <span>{MEASURE_UNIT[group[0].measure]}</span>
         <span />
         <span />
       </div>

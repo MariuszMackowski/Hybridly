@@ -45,7 +45,7 @@ export default function WorkoutDetailPage() {
                 <tr>
                   <th>#</th>
                   <th>kg</th>
-                  <th>{ex.sets.some((s) => s.seconds !== null && s.reps === null) ? 's' : 'reps'}</th>
+                  <th>{ex.sets.some((s) => s.distance_m !== null) ? 'm' : ex.sets.some((s) => s.seconds !== null) ? 's' : 'reps'}</th>
                   <th>e1RM</th>
                   <th />
                 </tr>
@@ -55,7 +55,7 @@ export default function WorkoutDetailPage() {
                   <tr key={s.set_index} className={s.is_warmup ? 'muted' : ''}>
                     <td>{s.is_warmup ? 'W' : ++working}</td>
                     <td>{kg(s.weight_kg)}</td>
-                    <td>{s.reps ?? s.seconds ?? '–'}</td>
+                    <td>{s.reps ?? s.seconds ?? (s.distance_m !== null ? kg(s.distance_m) : '–')}</td>
                     <td>{s.e1rm_kg === null ? '–' : kg(s.e1rm_kg)}</td>
                     <td>{s.is_pr && <span className="badge badge-pr">PR</span>}</td>
                   </tr>

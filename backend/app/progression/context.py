@@ -16,6 +16,7 @@ class PreviousSet(BaseModel):
     weight_kg: float | None
     reps: int | None
     seconds: int | None
+    distance_m: float | None
     is_warmup: bool
 
 
@@ -130,6 +131,7 @@ def build_context(
                     weight_kg=float(s.weight_kg) if s.weight_kg is not None else None,
                     reps=s.reps,
                     seconds=s.seconds,
+                    distance_m=s.distance_m,
                     is_warmup=s.is_warmup,
                 )
                 for s in last.sets

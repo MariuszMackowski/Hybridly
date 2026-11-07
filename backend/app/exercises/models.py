@@ -10,7 +10,7 @@ class Exercise(Base):
 
     __tablename__ = "exercise"
     __table_args__ = (
-        CheckConstraint("measure IN ('reps', 'time')", name="ck_exercise_measure"),
+        CheckConstraint("measure IN ('reps', 'time', 'distance')", name="ck_exercise_measure"),
         Index("uq_exercise_name_lower", text("lower(name)"), unique=True),
     )
 

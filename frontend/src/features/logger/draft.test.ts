@@ -40,7 +40,7 @@ function ctx(ex: ExerciseOut, prev: [number, number, boolean?][] = [],
     exercise: ex,
     previous: prev.length
       ? { workout_id: 9, started_at: '2026-11-01T07:00:00Z',
-          sets: prev.map(([w, r, wu]) => ({ weight_kg: w, reps: r, seconds: null, is_warmup: !!wu })) }
+          sets: prev.map(([w, r, wu]) => ({ weight_kg: w, reps: r, seconds: null, distance_m: null, is_warmup: !!wu })) }
       : null,
     suggestions: sugg.map(([w, r]) => ({ weight_kg: w, reps: r, kind: 'increase' as const })),
   }
@@ -55,7 +55,7 @@ describe('draft', () => {
       { 1: ctx(bench, [[60, 8], [60, 8]], [[62.5, 6], [62.5, 6]]) }, NOW, 'c1')
     const rows = d.exercises[0].rows
     expect(rows.map((r) => [r.weightKg, r.reps, r.done])).toEqual([[62.5, 6, false], [62.5, 6, false]])
-    expect(rows[0].previous).toEqual({ weightKg: 60, reps: 8, seconds: null })
+    expect(rows[0].previous).toEqual({ weightKg: 60, reps: 8, seconds: null, distanceM: null })
     expect(d.warmup).toEqual([{ text: 'Bike 3 min', done: false }])
   })
 
@@ -75,7 +75,7 @@ describe('draft', () => {
     const rows = d.exercises[0].rows
     expect(rows.map((r) => r.isWarmup)).toEqual([true, true, false, false])
     expect([rows[0].weightKg, rows[0].reps, rows[1].weightKg]).toEqual([20, 10, null])
-    expect(rows[2].previous).toEqual({ weightKg: 60, reps: 8, seconds: null })
+    expect(rows[2].previous).toEqual({ weightKg: 60, reps: 8, seconds: null, distanceM: null })
     expect(rows[2].suggestion?.weightKg).toBe(62.5)
   })
 
@@ -137,7 +137,7 @@ describe('draft', () => {
     expect(payload.template_id).toBe(1)
     expect(payload.exercises).toEqual([
       { exercise_id: 1, superset_group: null,
-        sets: [{ weight_kg: 60, reps: 8, seconds: null, is_warmup: false }] },
+        sets: [{ weight_kg: 60, reps: 8, seconds: null, distance_m: null, is_warmup: false }] },
     ])
   })
 

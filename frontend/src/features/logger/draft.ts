@@ -7,7 +7,13 @@ import type {
   WorkoutCreate,
 } from '../../api/types'
 
-export type SetValues = { weightKg: number | null; reps: number | null; seconds: number | null }
+export type SetValues = {
+  weightKg: number | null
+  reps: number | null
+  seconds: number | null
+  /** Optional so drafts saved before distance logging still load. */
+  distanceM?: number | null
+}
 
 export type DraftSet = SetValues & {
   done: boolean
@@ -48,7 +54,7 @@ export type WorkoutDraft = {
 type Targets = Pick<DraftExercise, 'warmupSets' | 'sets' | 'repMin' | 'repMax'>
 
 const DEFAULT_TARGETS: Targets = { warmupSets: 0, sets: 3, repMin: 8, repMax: 10 }
-const EMPTY: SetValues = { weightKg: null, reps: null, seconds: null }
+const EMPTY: SetValues = { weightKg: null, reps: null, seconds: null, distanceM: null }
 
 let keyCounter = 0
 /** Unique key for an exercise card within a draft. */
@@ -58,7 +64,7 @@ const nextKey = () => `ex-${Date.now().toString(36)}-${keyCounter++}`
 function buildRows(ctx: ExerciseContext, t: Targets): DraftSet[] {
   const prevSets = ctx.previous?.sets ?? []
   const toValues = (s: (typeof prevSets)[number]): SetValues => ({
-    weightKg: s.weight_kg, reps: s.reps, seconds: s.seconds,
+    weightKg: s.weight_kg, reps: s.reps, seconds: s.seconds, distanceM: s.distance_m,
   })
   const prevWarmups = prevSets.filter((s) => s.is_warmup).map(toValues)
   const prevWorking = prevSets.filter((s) => !s.is_warmup).map(toValues)
@@ -71,7 +77,7 @@ function buildRows(ctx: ExerciseContext, t: Targets): DraftSet[] {
     const suggestion = s ? { weightKg: s.weight_kg, reps: s.reps, kind: s.kind, reason: s.reason ?? null } : null
     const previous = prevWorking[i] ?? null
     const values = suggestion
-      ? { weightKg: suggestion.weightKg, reps: suggestion.reps, seconds: null }
+      ? { weightKg: suggestion.weightKg, reps: suggestion.reps, seconds: null, distanceM: null }
       : (previous ?? EMPTY)
     return { ...values, done: false, isWarmup: false, previous, suggestion }
   })
@@ -164,7 +170,9 @@ export function addSet(d: WorkoutDraft, key: string, warmup = false): WorkoutDra
       rows.splice(at, 0, { ...EMPTY, done: false, isWarmup: true, previous: null, suggestion: null })
     } else {
       const last = rows.filter((r) => !r.isWarmup).at(-1)
-      const values = last ? { weightKg: last.weightKg, reps: last.reps, seconds: last.seconds } : EMPTY
+      const values = last
+        ? { weightKg: last.weightKg, reps: last.reps, seconds: last.seconds, distanceM: last.distanceM ?? null }
+        : EMPTY
       rows.push({ ...values, done: false, isWarmup: false, previous: null, suggestion: null })
     }
     return { ...ex, rows }
@@ -200,8 +208,10 @@ export function displayOrder(d: WorkoutDraft): { group: DraftExercise[] }[] {
 }
 
 /** Whether a row holds a loggable result for its exercise. */
-const isLoggable = (ex: DraftExercise, r: DraftSet) =>
-  r.done && (ex.measure === 'time' ? r.seconds !== null && r.seconds > 0 : r.reps !== null && r.reps > 0)
+const isLoggable = (ex: DraftExercise, r: DraftSet) => {
+  const value = { reps: r.reps, time: r.seconds, distance: r.distanceM ?? null }[ex.measure]
+  return r.done && value !== null && value > 0
+}
 
 /** Payload for POST /api/workouts: only completed rows, empty exercises dropped. */
 export function toPayload(d: WorkoutDraft, endedAt: Date): WorkoutCreate {
@@ -220,8 +230,9 @@ export function toPayload(d: WorkoutDraft, endedAt: Date): WorkoutCreate {
           .filter((r) => isLoggable(ex, r))
           .map((r) => ({
             weight_kg: r.weightKg,
-            reps: ex.measure === 'time' ? null : r.reps,
+            reps: ex.measure === 'reps' ? r.reps : null,
             seconds: ex.measure === 'time' ? r.seconds : null,
+            distance_m: ex.measure === 'distance' ? (r.distanceM ?? null) : null,
             is_warmup: r.isWarmup,
           })),
       }))

@@ -5,18 +5,19 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class SetIn(BaseModel):
-    """One logged set: reps-based or time-based."""
+    """One logged set: reps-, time- or distance-based."""
 
     weight_kg: float | None = Field(default=None, ge=0)
     reps: int | None = Field(default=None, ge=1, le=100)
     seconds: int | None = Field(default=None, ge=1)
+    distance_m: float | None = Field(default=None, gt=0)
     is_warmup: bool = False
 
     @model_validator(mode="after")
-    def _reps_xor_seconds(self) -> "SetIn":
-        """Require exactly one of reps / seconds."""
-        if (self.reps is None) == (self.seconds is None):
-            raise ValueError("set needs exactly one of reps or seconds")
+    def _one_result(self) -> "SetIn":
+        """Require exactly one of reps / seconds / distance."""
+        if sum(v is not None for v in (self.reps, self.seconds, self.distance_m)) != 1:
+            raise ValueError("set needs exactly one of reps, seconds or distance")
         return self
 
 
@@ -49,6 +50,7 @@ class SetOut(BaseModel):
     weight_kg: float | None
     reps: int | None
     seconds: int | None
+    distance_m: float | None
     is_warmup: bool
     e1rm_kg: float | None
     is_pr: bool

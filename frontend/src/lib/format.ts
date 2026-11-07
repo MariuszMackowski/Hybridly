@@ -1,9 +1,18 @@
 /** Format a weight without trailing zeros (62.5, 60). */
 export const kg = (value: number | null) => (value === null ? '–' : `${Number(value.toFixed(2))}`)
 
-/** Compact "60 × 8" or "45 s" representation of a set. */
-export function setLabel(weightKg: number | null, reps: number | null, seconds: number | null): string {
-  if (seconds !== null && reps === null) return weightKg ? `${kg(weightKg)} kg · ${seconds} s` : `${seconds} s`
+/** Unit label of an exercise measure. */
+export const MEASURE_UNIT = { reps: 'reps', time: 's', distance: 'm' } as const
+
+/** Compact "60 × 8", "45 s" or "40 m" representation of a set. */
+export function setLabel(
+  weightKg: number | null,
+  reps: number | null,
+  seconds: number | null,
+  distanceM: number | null = null,
+): string {
+  const amount = seconds !== null ? `${seconds} s` : distanceM !== null ? `${kg(distanceM)} m` : null
+  if (amount !== null && reps === null) return weightKg ? `${kg(weightKg)} kg · ${amount}` : amount
   if (reps === null) return '–'
   return `${kg(weightKg ?? 0)} × ${reps}`
 }

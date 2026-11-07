@@ -76,6 +76,7 @@ export default function ExerciseForm(props: { exercise: ExerciseOut | null; onDo
           <select value={form.measure} onChange={(e) => set('measure', e.target.value as ExerciseIn['measure'])}>
             <option value="reps">reps</option>
             <option value="time">time</option>
+            <option value="distance">distance</option>
           </select>
         </label>
       </div>
