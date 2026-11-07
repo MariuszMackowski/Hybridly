@@ -7,3 +7,8 @@ node_modules/
 frontend/dist/
 *.egg-info/
 .superpowers/
+
+# Local-only notes (never published)
+docs/
+CLAUDE.md
+todo

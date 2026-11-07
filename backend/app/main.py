@@ -2,6 +2,7 @@ from fastapi import APIRouter, FastAPI
 
 from app.activities.router import router as activities_router
 from app.bodyweight.router import router as bodyweight_router
+from app.config import get_settings
 from app.coros.router import router as coros_router
 from app.exercises.router import router as exercises_router
 from app.history import router as history_router
@@ -19,8 +20,8 @@ def _health_router() -> APIRouter:
 
     @router.get("/health")
     def health() -> dict[str, str]:
-        """Report that the API is up."""
-        return {"status": "ok"}
+        """Report that the API is up, with the calendar timezone the UI must use."""
+        return {"status": "ok", "timezone": get_settings().timezone}
 
     return router
 

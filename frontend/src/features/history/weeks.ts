@@ -1,9 +1,14 @@
 import type { HistoryItem } from '../../api/types'
 
-const LOCAL_DAY = new Intl.DateTimeFormat('en-CA')
+let localDayFormat = new Intl.DateTimeFormat('en-CA')
 
-/** "YYYY-MM-DD" of an instant in the device timezone. */
-export const localDay = (iso: string) => LOCAL_DAY.format(new Date(iso))
+/** Use the server's calendar timezone so days and weeks match the backend (device timezone until set). */
+export function setCalendarTimezone(timeZone: string) {
+  localDayFormat = new Intl.DateTimeFormat('en-CA', { timeZone })
+}
+
+/** "YYYY-MM-DD" of an instant in the calendar timezone. */
+export const localDay = (iso: string) => localDayFormat.format(new Date(iso))
 
 /** Calendar arithmetic on "YYYY-MM-DD" strings (UTC noon avoids DST edges). */
 function shift(day: string, days: number): string {

@@ -4,14 +4,26 @@ Self-hosted training tracker for hybrid athletes: strength workouts logged from 
 
 **Stack:** FastAPI · SQLAlchemy 2 · Alembic · PostgreSQL 16 · React + TypeScript (Vite) · nginx · Docker Compose · pytest / Vitest · GitHub Actions.
 
-## Run
+Website: https://mariuszmackowski.github.io/Hybridly/
+
+## Install
+
+On a Linux machine with Docker and Git:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MariuszMackowski/Hybridly/main/install.sh | bash
+```
+
+It clones into `~/hybridly`, writes `.env` (random DB password, port, timezone), builds and starts the stack, seeds the exercise catalog and optionally adds a systemd unit that starts the app on boot. Re-run it to update.
+
+Manual setup instead:
 
 ```bash
 cp .env.example .env
 docker compose up -d --build        # db, backend (migrates on start), web on :8080
 ```
 
-Open http://localhost:8080.
+Open http://localhost:8080. The app has no login (single user): keep it on your LAN / Tailscale.
 
 ## First-time data
 
@@ -73,4 +85,6 @@ cd frontend && npm install && npm test && npm run typecheck
 npm run dev                                         # Vite on :5173, API proxied to :8080
 ```
 
-Design and plans: `docs/superpowers/`.
+## License
+
+MIT — see `LICENSE`.
