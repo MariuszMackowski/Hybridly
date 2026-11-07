@@ -132,7 +132,7 @@ KIND_ORDER = ("gym", "run", "walk", "other")
 
 @router.get("/history/calendar", response_model=list[CalendarDay])
 def calendar(month: str = Query(pattern=r"^\d{4}-\d{2}$"), db: Session = Depends(get_db)):
-    """Days of a month (Europe/Warsaw) that have workouts or activities."""
+    """Days of a month (app timezone) that have workouts or activities."""
     first = date.fromisoformat(f"{month}-01")
     after = (first + timedelta(days=32)).replace(day=1)
     start, end = local_range(first, after)

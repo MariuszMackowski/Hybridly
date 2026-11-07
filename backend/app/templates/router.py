@@ -76,7 +76,7 @@ class TodayFull(TodayOut, TodayExtras):
 
 @router.get("/today", response_model=TodayFull)
 def today(db: Session = Depends(get_db)):
-    """Today's date (Europe/Warsaw) and the template planned for it."""
+    """Today's date (app timezone) and the template planned for it."""
     day = local_today(utc_now())
     row = db.get(WeeklyTemplate, day.weekday())
     template = None

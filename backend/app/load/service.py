@@ -117,7 +117,7 @@ def _cardio_events(db: Session, since: datetime) -> list[tuple[Event, str]]:
 
 
 def _daily(events: list[tuple[Event, str]], first: date, days: int) -> dict[date, DayLoad]:
-    """Load per Warsaw day split into strength / cardio."""
+    """Load per local day split into strength / cardio."""
     out = {
         first + timedelta(days=i): DayLoad(day=first + timedelta(days=i), strength=0, cardio=0)
         for i in range(days)

@@ -45,7 +45,7 @@ class TodayExtras(BaseModel):
 
 
 def _run_km(db: Session, monday: date) -> float:
-    """Kilometres run in the Warsaw week starting on monday."""
+    """Kilometres run in the local week starting on monday."""
     start, end = local_range(monday, monday + timedelta(days=7))
     meters = db.scalar(
         select(func.coalesce(func.sum(Activity.distance_m), 0)).where(

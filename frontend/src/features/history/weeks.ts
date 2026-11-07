@@ -1,9 +1,9 @@
 import type { HistoryItem } from '../../api/types'
 
-const WARSAW_DAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Warsaw' })
+const LOCAL_DAY = new Intl.DateTimeFormat('en-CA')
 
-/** "YYYY-MM-DD" of an instant in Europe/Warsaw. */
-export const localDay = (iso: string) => WARSAW_DAY.format(new Date(iso))
+/** "YYYY-MM-DD" of an instant in the device timezone. */
+export const localDay = (iso: string) => LOCAL_DAY.format(new Date(iso))
 
 /** Calendar arithmetic on "YYYY-MM-DD" strings (UTC noon avoids DST edges). */
 function shift(day: string, days: number): string {

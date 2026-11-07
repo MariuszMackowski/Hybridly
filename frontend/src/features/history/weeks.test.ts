@@ -11,7 +11,7 @@ function item(started_at: string, sport: string, distance_m: number | null = nul
 }
 
 describe('weeks', () => {
-  it('localDay uses Warsaw time', () => {
+  it('localDay uses the device timezone (Warsaw in tests)', () => {
     expect(localDay('2026-11-01T23:30:00Z')).toBe('2026-11-02')
   })
 
