@@ -309,6 +309,31 @@ export interface TodayFull extends Today {
   strength_hint: string | null
 }
 
+export interface BestEffort {
+  key: string
+  distance_m: number
+  seconds: number | null
+  activity_id: number | null
+  day: string | null
+}
+
+export interface Records {
+  bests: BestEffort[]
+  predictor: {
+    day: string
+    vo2max: number | null
+    running_level: number | null
+    threshold_pace_s: number | null
+    predictions: Record<string, number>
+  } | null
+}
+
+export interface DayLoad {
+  day: string
+  strength: number
+  cardio: number
+}
+
 export interface RecoveryState {
   recovery_pct: number
   hours_to_full: number
@@ -317,5 +342,6 @@ export interface RecoveryState {
   coros_pct: number | null
   muscles: Record<string, number>
   regions: { region: string; recovery_pct: number; hours_to_ready: number }[]
-  daily: { day: string; strength: number; cardio: number }[]
+  daily: DayLoad[]
+  week: DayLoad[]
 }

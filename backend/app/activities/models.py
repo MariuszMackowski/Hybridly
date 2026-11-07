@@ -42,6 +42,7 @@ class Activity(Base):
     fit_sha256: Mapped[str] = mapped_column(String(64), unique=True)
     fit_path: Mapped[str]
     streams: Mapped[dict] = mapped_column(JSONB, default=dict)
+    best_efforts: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
 
     laps: Mapped[list["ActivityLap"]] = relationship(
         back_populates="activity", order_by="ActivityLap.index", cascade="all, delete-orphan"

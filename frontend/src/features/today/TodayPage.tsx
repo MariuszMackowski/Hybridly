@@ -6,6 +6,7 @@ import { startDraft, useDraft } from '../logger/useDraft'
 import SessionCard from '../plan/SessionCard'
 import TodayRoutines from '../plan/TodayRoutines'
 import RecoveryCard from '../recovery/RecoveryCard'
+import WeeklyLoadCard from '../recovery/WeeklyLoadCard'
 
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -79,6 +80,7 @@ export default function TodayPage() {
           ) : null}
         </div>
       )}
+      <WeeklyLoadCard />
       {error && <div className="banner">{error}</div>}
       {(t?.day_notes ?? []).map((note) => (
         <div key={note} className="card muted">

@@ -90,6 +90,35 @@ def parse_recovery(raw: str) -> dict:
     return {k: v for k, v in values.items() if v is not None}
 
 
+_PREDICTIONS = {"5k": "5 km", "10k": "10 km", "half": "Half Marathon", "marathon": "Marathon"}
+
+
+def _clock_seconds(value: str) -> int:
+    """'22:27' or '1:44:36' → seconds."""
+    seconds = 0
+    for part in value.split(":"):
+        seconds = seconds * 60 + int(part)
+    return seconds
+
+
+def parse_fitness(raw: str) -> dict:
+    """VO2max, running level, threshold pace (s/km) and race predictions (s)."""
+    text = _text(raw)
+    pace = re.search(r"Threshold Pace:\s*(\d+:\d{2})\b", text)
+    predictions = {}
+    for key, label in _PREDICTIONS.items():
+        match = re.search(rf"^\s*{label} Prediction:\s*(\d+(?::\d\d){{1,2}})\b", text, re.M)
+        if match:
+            predictions[key] = _clock_seconds(match.group(1))
+    values = {
+        "vo2max": _number(r"VO2max:\s*(\d+)", text, int),
+        "running_level": _number(r"Running Level:\s*(\d+)", text, int),
+        "threshold_pace_s": _clock_seconds(pace.group(1)) if pace else None,
+        "predictions": predictions or None,
+    }
+    return {k: v for k, v in values.items() if v is not None}
+
+
 def parse_training_load(raw: str) -> list[dict]:
     """Daily short/long-term load entries, newest first as returned."""
     text = _text(raw)

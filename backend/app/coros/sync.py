@@ -15,6 +15,7 @@ from app.coros.models import CorosAccount, CorosDaily
 from app.coros.parsing import (
     RecordRef,
     parse_activity_detail,
+    parse_fitness,
     parse_recovery,
     parse_sport_records,
     parse_training_load,
@@ -56,14 +57,20 @@ def _snapshot(db: Session, day: date, kind: str, raw: str, data) -> None:
 
 
 def _daily_snapshots(db: Session, client: CorosClient, today: date, report: SyncReport) -> None:
-    """Store today's recovery and training-load assessment."""
-    try:
-        raw = client.recovery()
-        _snapshot(db, today, "recovery", raw, parse_recovery(raw))
-        raw = client.training_load(7)
-        _snapshot(db, today, "training_load", raw, parse_training_load(raw))
-    except Exception as error:  # noqa: BLE001 — snapshots must not fail the sync
-        report.errors.append(f"daily snapshot: {error}")
+    """Store today's recovery, training-load and fitness assessment (each independently)."""
+    fetches = {
+        "recovery": (client.recovery, parse_recovery),
+        "training_load": (lambda: client.training_load(7), parse_training_load),
+        "fitness": (client.fitness, parse_fitness),
+    }
+    for kind, (fetch, parse) in fetches.items():
+        try:
+            raw = fetch()
+            data = parse(raw)
+            if data:  # an unparsable reply must not replace the last good snapshot
+                _snapshot(db, today, kind, raw, data)
+        except Exception as error:  # noqa: BLE001 — snapshots must not fail the sync
+            report.errors.append(f"{kind} snapshot: {error}")
 
 
 def run_sync(db: Session, client: CorosClient, today: date, cap: int = DEFAULT_CAP) -> SyncReport:

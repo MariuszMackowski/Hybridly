@@ -52,6 +52,7 @@ class CorosClient(Protocol):
     def activity_detail(self, label_id: str, sport_type: int) -> str: ...
     def recovery(self) -> str: ...
     def training_load(self, days: int) -> str: ...
+    def fitness(self) -> str: ...
 
 
 def _text(result) -> str:
@@ -121,3 +122,7 @@ class McpCorosClient:
     def training_load(self, days: int) -> str:
         """queryTrainingLoadAssessment text."""
         return _text(self._run("queryTrainingLoadAssessment", {"days": days}))
+
+    def fitness(self) -> str:
+        """queryFitnessAssessmentOverview text (VO2max, race predictions)."""
+        return _text(self._run("queryFitnessAssessmentOverview", {}))

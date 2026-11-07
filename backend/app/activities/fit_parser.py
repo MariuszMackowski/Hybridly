@@ -7,6 +7,8 @@ from datetime import UTC, datetime
 
 import fitdecode
 
+from app.activities.best_efforts import best_efforts
+
 SEMICIRCLE = 180 / 2**31
 STREAM_STEP_S = 5
 _SPORTS = {
@@ -55,6 +57,7 @@ class ParsedFit:
     avg_vr_pct: float | None = None
     laps: list[ParsedLap] = field(default_factory=list)
     streams: dict[str, list] = field(default_factory=dict)
+    best_efforts: dict[str, int] = field(default_factory=dict)
 
 
 def fit_sha256(data: bytes) -> str:
@@ -131,6 +134,18 @@ def _streams(records: list, start: datetime) -> dict[str, list]:
     return {k: v for k, v in channels.items() if k == "t" or any(x is not None for x in v)}
 
 
+def _efforts(records: list, start: datetime) -> dict[str, int]:
+    """Best efforts from full-resolution (timestamp, distance) records."""
+    times, dists = [], []
+    for rec in records:
+        ts, dist = _get(rec, "timestamp"), _get(rec, "distance")
+        if ts is None or dist is None or (dists and dist < dists[-1]):
+            continue
+        times.append((_utc(ts) - start).total_seconds())
+        dists.append(float(dist))
+    return best_efforts(times, dists)
+
+
 def _laps(laps: list, start: datetime) -> list[ParsedLap]:
     """Convert lap messages in file order."""
     result = []
@@ -176,4 +191,5 @@ def parse_fit(data: bytes) -> ParsedFit:
         avg_vr_pct=_get(session, "avg_vertical_ratio"),
         laps=_laps(groups["lap"], start),
         streams=_streams(groups["record"], start),
+        best_efforts=_efforts(groups["record"], start),
     )

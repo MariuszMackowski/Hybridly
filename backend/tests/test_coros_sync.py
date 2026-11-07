@@ -48,6 +48,9 @@ class FakeClient:
             "Short-Term Load: 30\nLong-Term Load: 40\nLoad Ratio: 0.75"
         )
 
+    def fitness(self):
+        return "VO2max: 52\n5 km Prediction: 22:27\nMarathon Prediction: 3:40:37"
+
 
 ITEMS = [
     ("1001", 100, TODAY - timedelta(days=1), "running"),

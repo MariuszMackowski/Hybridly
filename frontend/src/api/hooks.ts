@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet, apiSend } from './client'
 import type {
+  Records,
   RecoveryState,
   PlanSession,
   Plan,
@@ -278,3 +279,5 @@ export const useRoutineDone = (day: string | undefined) =>
 
 export const useRecovery = () =>
   useQuery({ queryKey: ['recovery'], queryFn: () => apiGet<RecoveryState>('/recovery') })
+
+export const useRecords = () => useQuery({ queryKey: ['records'], queryFn: () => apiGet<Records>('/records') })

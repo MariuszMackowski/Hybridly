@@ -45,6 +45,7 @@ SUMMARY_FIELDS = (
     "avg_vo_cm",
     "avg_vr_pct",
     "streams",
+    "best_efforts",
 )
 
 

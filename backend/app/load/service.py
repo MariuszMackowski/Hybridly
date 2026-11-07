@@ -59,6 +59,7 @@ class RecoveryOut(BaseModel):
     muscles: dict[str, float]
     regions: list[RegionOut]
     daily: list[DayLoad]
+    week: list[DayLoad]
 
 
 def _strength_events(db: Session, since: datetime) -> list[tuple[Event, str]]:
@@ -146,4 +147,5 @@ def current_state(db: Session) -> RecoveryOut:
         muscles=levels_from_scores(scores),
         regions=[RegionOut(**vars(r)) for r in region_recovery(scores)],
         daily=list(window.values())[-DAILY_DAYS:],
+        week=list(_daily(events, today - timedelta(days=today.weekday()), 7).values()),
     )
