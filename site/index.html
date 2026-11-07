@@ -29,6 +29,10 @@
     code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
     p code, li code { background: var(--card); padding: 1px 6px; border-radius: 6px; font-size: 14px; }
     ol, ul { padding-left: 22px; } li { margin: 6px 0; }
+    .shots { display: flex; gap: 14px; overflow-x: auto; padding: 4px 2px 14px; scroll-snap-type: x mandatory; }
+    .shots figure { margin: 0; flex: 0 0 220px; scroll-snap-align: start; }
+    .shots img { width: 220px; border-radius: 18px; border: 1px solid var(--line); display: block; }
+    .shots figcaption { color: var(--muted); font-size: 13px; margin-top: 8px; }
     footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
     a { color: var(--accent); }
   </style>
@@ -44,6 +48,17 @@
     <a class="btn primary" href="#install">Install</a>
     <a class="btn" href="https://github.com/MariuszMackowski/Hybridly">Source on GitHub</a>
   </div>
+
+  <div class="shots">
+    <figure><a href="screenshots/today.png"><img src="screenshots/today.png" alt="Today: planned session, weekly load" loading="lazy"></a><figcaption>Today: planned session, weekly load</figcaption></figure>
+    <figure><a href="screenshots/logger.png"><img src="screenshots/logger.png" alt="Workout logger with suggestions" loading="lazy"></a><figcaption>Workout logger with suggestions</figcaption></figure>
+    <figure><a href="screenshots/today-recovery.png"><img src="screenshots/today-recovery.png" alt="Recovery and muscle fatigue map" loading="lazy"></a><figcaption>Recovery and muscle fatigue map</figcaption></figure>
+    <figure><a href="screenshots/history.png"><img src="screenshots/history.png" alt="History calendar and feed" loading="lazy"></a><figcaption>History calendar and feed</figcaption></figure>
+    <figure><a href="screenshots/run.png"><img src="screenshots/run.png" alt="Run details vs. plan" loading="lazy"></a><figcaption>Run details vs. plan</figcaption></figure>
+    <figure><a href="screenshots/run-charts.png"><img src="screenshots/run-charts.png" alt="Run charts" loading="lazy"></a><figcaption>Run charts</figcaption></figure>
+    <figure><a href="screenshots/records.png"><img src="screenshots/records.png" alt="Race predictor and best efforts" loading="lazy"></a><figcaption>Race predictor and best efforts</figcaption></figure>
+  </div>
+  <p style="color:var(--muted);font-size:13px;margin-top:0">Screenshots use fictional demo data.</p>
 
   <h2>What it does</h2>
   <div class="grid">

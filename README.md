@@ -2,6 +2,13 @@
 
 Self-hosted training tracker for hybrid athletes: strength workouts logged from the phone with load suggestions, running data from COROS, recovery and progress in one place. Single user, runs on a home machine and is reached over Tailscale as a PWA.
 
+<p>
+  <img src="site/screenshots/today.png" width="200" alt="Today">
+  <img src="site/screenshots/logger.png" width="200" alt="Logger">
+  <img src="site/screenshots/run-charts.png" width="200" alt="Run">
+  <img src="site/screenshots/records.png" width="200" alt="Records">
+</p>
+
 **Stack:** FastAPI · SQLAlchemy 2 · Alembic · PostgreSQL 16 · React + TypeScript (Vite) · nginx · Docker Compose · pytest / Vitest · GitHub Actions.
 
 Website: https://mariuszmackowski.github.io/Hybridly/
