@@ -80,7 +80,6 @@ export default function TodayPage() {
           ) : null}
         </div>
       )}
-      <WeeklyLoadCard />
       {error && <div className="banner">{error}</div>}
       {(t?.day_notes ?? []).map((note) => (
         <div key={note} className="card muted">
@@ -148,6 +147,7 @@ export default function TodayPage() {
           )}
         </>
       )}
+      <WeeklyLoadCard />
 
       {t && t.routines.length > 0 && <TodayRoutines day={t.date} planned={t.routines} />}
       <RecoveryCard />
