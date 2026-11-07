@@ -24,7 +24,10 @@ function WorkoutRow({ item }: { item: HistoryItem }) {
         <strong>
           {SPORT_ICON.gym} {item.title ?? 'Workout'}
         </strong>
-        {!!item.pr_count && <span className="badge badge-pr">{item.pr_count} PR</span>}
+        <span className="row">
+          {!!item.pr_count && <span className="badge badge-pr">{item.pr_count} PR</span>}
+          {item.training_load !== null && <span className="badge badge-pr">TL {item.training_load}</span>}
+        </span>
       </div>
       <span className="muted">
         {dateTime(item.started_at)}

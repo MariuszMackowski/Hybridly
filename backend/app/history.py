@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, defer
 from app.activities.models import Activity
 from app.activities.schemas import ActivitySummary
 from app.db import get_db
+from app.load.service import workout_loads
 from app.time import local_date, local_range
 from app.workouts.models import Workout
 from app.workouts.service import list_summaries
@@ -40,7 +41,9 @@ class HistoryItem(BaseModel):
 
 
 def _workouts(db: Session, count: int, between=None) -> list[HistoryItem]:
-    """Newest strength workouts as history items."""
+    """Newest strength workouts as history items, with their training load."""
+    summaries = list_summaries(db, count, 0, between)
+    loads = workout_loads(db, [w.id for w in summaries])
     return [
         HistoryItem(
             kind="workout",
@@ -52,8 +55,9 @@ def _workouts(db: Session, count: int, between=None) -> list[HistoryItem]:
             exercise_count=w.exercise_count,
             set_count=w.set_count,
             pr_count=w.pr_count,
+            training_load=loads.get(w.id),
         )
-        for w in list_summaries(db, count, 0, between)
+        for w in summaries
     ]
 
 

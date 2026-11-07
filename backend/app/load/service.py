@@ -62,8 +62,8 @@ class RecoveryOut(BaseModel):
     week: list[DayLoad]
 
 
-def _strength_events(db: Session, since: datetime) -> list[tuple[Event, str]]:
-    """One event per working set, with muscle hard-set equivalents."""
+def _working_sets(db: Session, *where) -> list[tuple[int, Event]]:
+    """(workout id, event) per working set matching `where`, with muscle hard-set equivalents."""
     best = dict(
         db.execute(
             select(WorkoutExercise.exercise_id, func.max(WorkoutSet.e1rm_kg))
@@ -72,14 +72,14 @@ def _strength_events(db: Session, since: datetime) -> list[tuple[Event, str]]:
         ).all()
     )
     rows = db.execute(
-        select(WorkoutSet, Exercise, Workout.started_at)
+        select(WorkoutSet, Exercise, Workout.id, Workout.started_at)
         .join(WorkoutExercise, WorkoutSet.workout_exercise_id == WorkoutExercise.id)
         .join(Workout, WorkoutExercise.workout_id == Workout.id)
         .join(Exercise, WorkoutExercise.exercise_id == Exercise.id)
-        .where(Workout.started_at >= since, WorkoutSet.is_warmup.is_(False))
+        .where(WorkoutSet.is_warmup.is_(False), *where)
     ).all()
-    events = []
-    for workout_set, exercise, started_at in rows:
+    out = []
+    for workout_set, exercise, workout_id, started_at in rows:
         top = best.get(exercise.id)
         rel = float(workout_set.e1rm_kg) / float(top) if workout_set.e1rm_kg and top else None
         sides = 2 if exercise.per_side else 1
@@ -88,8 +88,21 @@ def _strength_events(db: Session, since: datetime) -> list[tuple[Event, str]]:
         for m in exercise.secondary_muscles:
             muscles[m] = muscles.get(m, 0.0) + 0.5 * hard
         load = strength_set_load(exercise.load_factor, rel, exercise.per_side)
-        events.append((Event(started_at, load, muscles), "strength"))
-    return events
+        out.append((workout_id, Event(started_at, load, muscles)))
+    return out
+
+
+def _strength_events(db: Session, since: datetime) -> list[tuple[Event, str]]:
+    """One event per working set since `since`."""
+    return [(event, "strength") for _, event in _working_sets(db, Workout.started_at >= since)]
+
+
+def workout_loads(db: Session, workout_ids: list[int]) -> dict[int, int]:
+    """Training load per workout, on the same scale as COROS run load."""
+    totals: dict[int, float] = {}
+    for workout_id, event in _working_sets(db, Workout.id.in_(workout_ids)):
+        totals[workout_id] = totals.get(workout_id, 0.0) + event.load
+    return {workout_id: round(total) for workout_id, total in totals.items()}
 
 
 def _cardio_events(db: Session, since: datetime) -> list[tuple[Event, str]]:
