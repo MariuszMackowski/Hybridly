@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Measure } from '../../api/types'
 import { parseDecimal } from '../../lib/decimal'
 import { kg, MEASURE_UNIT, setLabel } from '../../lib/format'
@@ -7,25 +7,43 @@ import type { DraftSet, SetValues } from './draft'
 const ARROWS = { increase: '↑', hold: '=', reduce: '↓' } as const
 const KIND_CLASS = { increase: 'good', hold: 'muted', reduce: 'bad' } as const
 
-/** Text input that keeps what the user types but reports the parsed number. */
+const show = (value: number | null) => (value === null ? '' : kg(value))
+
+/**
+ * Text input that keeps what the user types but reports the parsed number.
+ * Focusing clears the field (old value stays as placeholder) so a new number can be typed
+ * straight away; leaving it untouched restores the old value.
+ */
 function NumberInput(props: {
   value: number | null
   decimal?: boolean
   placeholder?: string
   onChange: (value: number | null) => void
 }) {
-  const [text, setText] = useState(props.value === null ? '' : kg(props.value))
+  const [text, setText] = useState(show(props.value))
+  const [editing, setEditing] = useState(false)
+  const typed = useRef(false)
   useEffect(() => {
-    if (parseDecimal(text) !== props.value) setText(props.value === null ? '' : kg(props.value))
+    if (!editing && parseDecimal(text) !== props.value) setText(show(props.value))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.value])
   return (
     <input
       className="set-input"
       inputMode={props.decimal ? 'decimal' : 'numeric'}
-      placeholder={props.placeholder}
+      placeholder={editing && props.value !== null ? show(props.value) : props.placeholder}
       value={text}
+      onFocus={() => {
+        typed.current = false
+        setEditing(true)
+        setText('')
+      }}
+      onBlur={() => {
+        setEditing(false)
+        if (!typed.current) setText(show(props.value))
+      }}
       onChange={(e) => {
+        typed.current = true
         setText(e.target.value)
         props.onChange(parseDecimal(e.target.value))
       }}

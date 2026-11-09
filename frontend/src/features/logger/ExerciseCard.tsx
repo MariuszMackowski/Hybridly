@@ -47,7 +47,7 @@ export default function ExerciseCard(props: { group: DraftExercise[]; actions: C
       <div className="set-row set-head muted">
         <span>#</span>
         <span>Prev</span>
-        <span>Next</span>
+        <span>Suggested</span>
         <span>kg</span>
         <span>{MEASURE_UNIT[group[0].measure]}</span>
         <span />
