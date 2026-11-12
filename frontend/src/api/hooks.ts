@@ -15,6 +15,7 @@ import type {
   UploadResult,
   BodyweightEntry,
   ExerciseProgress,
+  WorkoutInsights,
   ExerciseContext,
   ExerciseIn,
   ExerciseOut,
@@ -64,6 +65,9 @@ export const useBodyweight = () =>
 
 export const useWorkout = (id: number) =>
   useQuery({ queryKey: ['workouts', id], queryFn: () => apiGet<WorkoutOut>(`/workouts/${id}`) })
+
+export const useWorkoutInsights = (id: number) =>
+  useQuery({ queryKey: ['workouts', id, 'insights'], queryFn: () => apiGet<WorkoutInsights>(`/workouts/${id}/insights`) })
 
 export const useWorkouts = () =>
   useInfiniteQuery({

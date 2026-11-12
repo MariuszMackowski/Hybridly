@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.workouts import service
+from app.workouts.insights import WorkoutInsights, workout_insights
 from app.workouts.models import Workout
 from app.workouts.schemas import WorkoutCreate, WorkoutOut, WorkoutSummary
 
@@ -45,6 +46,12 @@ def list_workouts(
 def get_workout(workout_id: int, db: Session = Depends(get_db)):
     """Get one workout with all sets."""
     return service.to_out(_get_or_404(db, workout_id))
+
+
+@router.get("/workouts/{workout_id}/insights", response_model=WorkoutInsights)
+def get_workout_insights(workout_id: int, db: Session = Depends(get_db)):
+    """Volume per muscle and each exercise compared with ~4 weeks earlier."""
+    return workout_insights(db, _get_or_404(db, workout_id))
 
 
 @router.delete("/workouts/{workout_id}", status_code=status.HTTP_204_NO_CONTENT)

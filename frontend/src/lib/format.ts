@@ -17,13 +17,18 @@ export function setLabel(
   return `${kg(weightKg ?? 0)} × ${reps}`
 }
 
-/** Local date-time like "Mon 03.11.2026 07:30". */
-export function dateTime(iso: string): string {
+/** Local date like "Mon 03.11.2026" (or "Mon 03.11.26" with a short year). */
+export function dayDate(iso: string, shortYear = false): string {
   const d = new Date(iso)
   const day = d.toLocaleDateString('en-GB', { weekday: 'short' })
-  const date = d.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' })
-  const time = d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })
-  return `${day} ${date} ${time}`
+  const date = d.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: shortYear ? '2-digit' : 'numeric' })
+  return `${day} ${date}`
+}
+
+/** Local date-time like "Mon 03.11.2026 07:30". */
+export function dateTime(iso: string): string {
+  const time = new Date(iso).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })
+  return `${dayDate(iso)} ${time}`
 }
 
 /** Minutes between two ISO timestamps, or null. */

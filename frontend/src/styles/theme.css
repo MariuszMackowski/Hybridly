@@ -204,3 +204,11 @@ summary > strong { white-space: nowrap; }
 
 /* Section heading inside long editors (e.g. template: warm-up / exercises / cool-down) */
 .section-title { font-size: 13px; font-weight: 600; margin: 8px 0 0; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
+.muscle-bar { display: grid; grid-template-columns: 96px 1fr auto; gap: 10px; align-items: center; font-size: 14px; }
+.muscle-bar > span:first-child { text-transform: capitalize; }
+.muscle-bar-track { height: 10px; }
+.muscle-bar-fill { display: block; height: 100%; border-radius: 5px; background: var(--accent); }
+.insight { text-align: right; font-size: 14px; white-space: nowrap; }
+.record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.record-grid .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+.accent { color: var(--accent); }

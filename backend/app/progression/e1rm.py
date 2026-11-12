@@ -9,3 +9,14 @@ def estimate_1rm(weight_kg: float, reps: int) -> float:
     if reps <= 12:
         return round(weight_kg * 36 / (37 - reps), 2)
     return round(weight_kg * (1 + reps / 30), 2)
+
+
+def weight_for_reps(one_rm: float, reps: int) -> float:
+    """Inverse of estimate_1rm: the weight that gives `one_rm` at `reps` reps."""
+    if reps < 1:
+        raise ValueError("reps must be >= 1")
+    if reps == 1:
+        return one_rm
+    if reps <= 12:
+        return one_rm * (37 - reps) / 36
+    return one_rm / (1 + reps / 30)

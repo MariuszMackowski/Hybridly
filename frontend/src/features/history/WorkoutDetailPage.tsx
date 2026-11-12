@@ -1,10 +1,14 @@
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useDeleteWorkout, useWorkout } from '../../api/hooks'
+import { useDeleteWorkout, useWorkout, useWorkoutInsights } from '../../api/hooks'
 import { dateTime, durationMin, kg } from '../../lib/format'
+import { InsightSummary, MuscleVolumeCard, type InsightMode } from './WorkoutInsights'
 
 export default function WorkoutDetailPage() {
   const id = Number(useParams().id)
   const query = useWorkout(id)
+  const insights = useWorkoutInsights(id).data
+  const [mode, setMode] = useState<InsightMode>('volume')
   const remove = useDeleteWorkout()
   const navigate = useNavigate()
   const w = query.data
@@ -32,16 +36,32 @@ export default function WorkoutDetailPage() {
           {w.source === 'gravitus' && ' · imported from Gravitus'}
         </div>
       </div>
+      {insights && <MuscleVolumeCard muscles={insights.muscles} />}
+      {insights && (
+        <div className="row spread">
+          <span className="muted section-label">Workout</span>
+          <div className="chips">
+            {(['best', 'volume'] as const).map((m) => (
+              <button key={m} className={`chip${mode === m ? ' on' : ''}`} onClick={() => setMode(m)}>
+                {m === 'best' ? 'Best set' : 'Volume'}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {w.exercises.map((ex, i) => {
         let working = 0
         return (
           <div key={`${ex.exercise_id}-${i}`} className="card">
             <div className="row spread">
-              <Link to={`/exercises/${ex.exercise_id}/progress`}>
-                <strong>{ex.exercise_name}</strong>
-                {ex.grip && <span className="muted"> · {ex.grip}</span>}
-              </Link>
-              {ex.per_side && <span className="badge">per side</span>}
+              <div>
+                <Link to={`/exercises/${ex.exercise_id}/progress`}>
+                  <strong>{ex.exercise_name}</strong>
+                  {ex.grip && <span className="muted"> · {ex.grip}</span>}
+                </Link>
+                {ex.per_side && <span className="badge"> per side</span>}
+              </div>
+              <InsightSummary insight={insights?.exercises[i] ?? null} mode={mode} />
             </div>
             <table className="sets">
               <thead>

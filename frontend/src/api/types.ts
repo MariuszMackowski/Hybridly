@@ -133,18 +133,59 @@ export interface WorkoutSummary {
   pr_count: number
 }
 
+export interface SetPair {
+  weight_kg: number
+  reps: number
+}
+
+export interface ProgressSession {
+  workout_id: number
+  started_at: string
+  grip: string | null
+  best_e1rm_kg: number | null
+  top_weight_kg: number
+  top_reps: number
+  volume_kg: number
+  sets: SetPair[]
+}
+
+export interface RecordValue {
+  value_kg: number
+  weight_kg: number | null
+  reps: number | null
+  workout_id: number
+  started_at: string
+}
+
 export interface ExerciseProgress {
   grips: string[]
-  sessions: {
-    workout_id: number
-    started_at: string
-    grip: string | null
-    best_e1rm_kg: number | null
-    top_weight_kg: number
-    top_reps: number
-    volume_kg: number
-  }[]
+  sessions: ProgressSession[]
   weeks: { week_start: string; volume_kg: number; sets: number }[]
+  recent: ProgressSession[]
+  records: {
+    best_e1rm: RecordValue | null
+    heaviest: RecordValue | null
+    biggest_set: RecordValue | null
+    best_session: RecordValue | null
+  }
+  maxes: { reps: number; weight_kg: number }[]
+  to_beat: { target_e1rm_kg: number; options: SetPair[] } | null
+}
+
+export interface ExerciseInsight {
+  metric: 'volume' | 'reps'
+  volume_kg: number
+  total_reps: number
+  best_set: SetPair | null
+  best_e1rm_kg: number | null
+  volume_change_pct: number | null
+  best_change_pct: number | null
+  weeks_ago: number | null
+}
+
+export interface WorkoutInsights {
+  muscles: { muscle: string; volume_kg: number }[]
+  exercises: (ExerciseInsight | null)[]
 }
 
 export interface CoachExport {

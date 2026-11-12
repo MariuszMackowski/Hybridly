@@ -4,8 +4,8 @@ import { Bar, BarChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, X
 import { useExerciseProgress, useExercises } from '../../api/hooks'
 import BackButton from '../../components/BackButton'
 import { AXIS_PROPS, shortDay, TOOLTIP_STYLE } from '../../lib/chart'
-import { kg } from '../../lib/format'
 import { localDay } from '../history/weeks'
+import { MaxesCard, RecentSessions, RecordsCard, ToBeat } from './ExerciseStats'
 
 const RANGES = { '3M': 91, '1Y': 365, All: null } as const
 type Range = keyof typeof RANGES
@@ -43,8 +43,6 @@ export default function ExerciseProgressPage() {
     .filter((s) => !from || s.day >= from)
   const weeks = (data?.weeks ?? []).filter((w) => !from || w.week_start >= from)
   const multiYear = sessions.length > 0 && sessions[0].day.slice(0, 4) !== sessions.at(-1)!.day.slice(0, 4)
-  const e1rms = sessions.map((s) => s.best_e1rm_kg).filter((v): v is number => v !== null)
-  const last = sessions.at(-1)
 
   return (
     <div className="page stack">
@@ -56,22 +54,7 @@ export default function ExerciseProgressPage() {
       )}
       <Chips options={Object.keys(RANGES) as Range[]} value={range} onChange={setRange} />
       {data && sessions.length === 0 && <div className="muted">No rep-based working sets in this range.</div>}
-      {last && (
-        <div className="card row spread">
-          <span>
-            <span className="muted">Last top set </span>
-            <strong>
-              {kg(last.top_weight_kg)} × {last.top_reps}
-            </strong>
-          </span>
-          {e1rms.length > 0 && (
-            <span>
-              <span className="muted">Best e1RM </span>
-              <strong>{kg(Math.max(...e1rms))} kg</strong>
-            </span>
-          )}
-        </div>
-      )}
+      {data && <ToBeat toBeat={data.to_beat} />}
       {sessions.length > 0 && (
         <div className="card">
           <strong>Estimated 1RM & top set</strong>
@@ -87,6 +70,9 @@ export default function ExerciseProgressPage() {
           </ResponsiveContainer>
         </div>
       )}
+      {data && <RecentSessions sessions={data.recent} />}
+      {data && <RecordsCard records={data.records} />}
+      {data && <MaxesCard maxes={data.maxes} />}
       {weeks.length > 0 && (
         <div className="card">
           <strong>Weekly volume (kg × reps)</strong>
