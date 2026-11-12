@@ -212,3 +212,4 @@ summary > strong { white-space: nowrap; }
 .record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .record-grid .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
 .accent { color: var(--accent); }
+.card-menu { justify-content: flex-start; flex-wrap: wrap; }

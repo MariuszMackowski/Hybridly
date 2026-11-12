@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { DraftExercise, DraftSet, SetValues } from './draft'
 import { MEASURE_UNIT } from '../../lib/format'
 import SetRow from './SetRow'
@@ -9,6 +10,8 @@ export type CardActions = {
   onAddSet: (key: string, warmup: boolean) => void
   onSwap: (exercise: DraftExercise) => void
   onGrip: (exercise: DraftExercise, grip: string) => void
+  onSuperset: (exercise: DraftExercise) => void
+  onUnlink: (key: string) => void
   onRemove: (key: string) => void
 }
 
@@ -32,6 +35,13 @@ function lines(group: DraftExercise[]): Line[] {
 
 export default function ExerciseCard(props: { group: DraftExercise[]; actions: CardActions }) {
   const { group, actions } = props
+  const [menu, setMenu] = useState<string | null>(null)
+  const menuEx = group.find((e) => e.key === menu)
+  /** Close the ⋯ menu, then run the chosen action. */
+  const close = (action: () => void) => () => {
+    setMenu(null)
+    action()
+  }
   return (
     <div className="card exercise-card">
       {group.map((ex, g) => (
@@ -96,8 +106,26 @@ export default function ExerciseCard(props: { group: DraftExercise[]; actions: C
           >
             Remove
           </button>
+          <button className="btn-small" aria-label="More" onClick={() => setMenu(menu === ex.key ? null : ex.key)}>
+            ⋯
+          </button>
         </div>
       ))}
+      {menuEx && (
+        <div className="row card-actions card-menu">
+          <button className="btn-small" onClick={close(() => actions.onSwap(menuEx))}>
+            Replace
+          </button>
+          <button className="btn-small" onClick={close(() => actions.onSuperset(menuEx))}>
+            Super set with…
+          </button>
+          {menuEx.supersetGroup !== null && group.length > 1 && (
+            <button className="btn-small" onClick={close(() => actions.onUnlink(menuEx.key))}>
+              Unlink superset
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -9,8 +9,11 @@ import {
   removeExercise,
   removeSet,
   setGrip,
+  supersetWithExisting,
+  supersetWithNew,
   swapExercise,
   toggleChecklist,
+  unlinkSuperset,
   toggleDone,
   toPayload,
   updateSet,
@@ -57,7 +60,14 @@ function Checklist(props: { title: string; items: WorkoutDraft['warmup']; onTogg
   )
 }
 
-type Picker = { mode: 'swap'; exercise: DraftExercise } | { mode: 'add' } | null
+/** Workout exercises that can join `ex`'s superset (not already in its block). */
+function supersetCandidates(d: WorkoutDraft, ex: DraftExercise) {
+  return d.exercises
+    .filter((e) => e.key !== ex.key && (ex.supersetGroup === null || e.supersetGroup !== ex.supersetGroup))
+    .map((e) => ({ key: e.key, name: e.name }))
+}
+
+type Picker = { mode: 'swap' | 'superset'; exercise: DraftExercise } | { mode: 'add' } | null
 
 export default function LoggerPage() {
   const { draft, setDraft, updateDraft } = useDraft()
@@ -82,6 +92,8 @@ export default function LoggerPage() {
     },
     onRemove: (key) => update((d) => removeExercise(d, key)),
     onGrip: (exercise, grip) => void changeGrip(exercise, grip),
+    onSuperset: (exercise) => setPicker({ mode: 'superset', exercise }),
+    onUnlink: (key) => update((d) => unlinkSuperset(d, key)),
   }
 
   /** Switch grip at once; reload Prev/Suggested for it unless sets got logged or the grip changed meanwhile. */
@@ -108,6 +120,10 @@ export default function LoggerPage() {
         const ex = current.exercise
         const ctx = await fetchContext(exerciseId, ex.sets, ex.repMin, ex.repMax)
         update((d) => swapExercise(d, ex.key, ctx))
+      } else if (current?.mode === 'superset') {
+        const ex = current.exercise
+        const ctx = await fetchContext(exerciseId, ex.sets, ex.repMin, ex.repMax)
+        update((d) => supersetWithNew(d, ex.key, ctx))
       } else {
         const ctx = await fetchContext(exerciseId)
         update((d) => addExercise(d, ctx))
@@ -185,8 +201,20 @@ export default function LoggerPage() {
 
       {picker && (
         <ExercisePicker
-          title={picker.mode === 'swap' ? `Replace ${picker.exercise.name}` : 'Add exercise'}
+          title={
+            picker.mode === 'swap'
+              ? `Replace ${picker.exercise.name}`
+              : picker.mode === 'superset'
+                ? `Super set with ${picker.exercise.name}`
+                : 'Add exercise'
+          }
           alternatives={picker.mode === 'swap' ? picker.exercise.alternatives : undefined}
+          similarTo={picker.mode === 'swap' ? picker.exercise.exerciseId : undefined}
+          inWorkout={picker.mode === 'superset' ? supersetCandidates(draft, picker.exercise) : undefined}
+          onPickExisting={(key) => {
+            if (picker.mode === 'superset') update((d) => supersetWithExisting(d, picker.exercise.key, key))
+            setPicker(null)
+          }}
           onPick={pick}
           onClose={() => setPicker(null)}
         />

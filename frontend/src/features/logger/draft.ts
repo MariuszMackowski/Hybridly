@@ -165,10 +165,75 @@ export const addExercise = (d: WorkoutDraft, ctx: ExerciseContext): WorkoutDraft
   exercises: [...d.exercises, newExercise(ctx, DEFAULT_TARGETS)],
 })
 
-export const removeExercise = (d: WorkoutDraft, key: string): WorkoutDraft => ({
-  ...d,
-  exercises: d.exercises.filter((ex) => ex.key !== key),
-})
+export const removeExercise = (d: WorkoutDraft, key: string): WorkoutDraft =>
+  normalizeGroups({ ...d, exercises: d.exercises.filter((ex) => ex.key !== key) })
+
+/** Index just past the superset block containing `key` (just past the card when not in one). */
+function blockEnd(exercises: DraftExercise[], key: string): number {
+  const i = exercises.findIndex((e) => e.key === key)
+  const group = exercises[i].supersetGroup
+  let end = i + 1
+  if (group !== null) while (end < exercises.length && exercises[end].supersetGroup === group) end++
+  return end
+}
+
+/** A superset of one is just a normal card: clear groups left with a single exercise. */
+function normalizeGroups(d: WorkoutDraft): WorkoutDraft {
+  const sizes = new Map<number, number>()
+  d.exercises.forEach((e) => e.supersetGroup !== null && sizes.set(e.supersetGroup, (sizes.get(e.supersetGroup) ?? 0) + 1))
+  const lone = (e: DraftExercise) => e.supersetGroup !== null && sizes.get(e.supersetGroup) === 1
+  return d.exercises.some(lone)
+    ? { ...d, exercises: d.exercises.map((e) => (lone(e) ? { ...e, supersetGroup: null } : e)) }
+    : d
+}
+
+/** Put `key` into a superset group (a new one if it has none) and return the group. */
+function ensureGroup(d: WorkoutDraft, key: string): [WorkoutDraft, number, DraftExercise] | null {
+  const anchor = d.exercises.find((e) => e.key === key)
+  if (!anchor) return null // removed while the picker was loading
+  if (anchor.supersetGroup !== null) return [d, anchor.supersetGroup, anchor]
+  const group = Math.max(0, ...d.exercises.map((e) => e.supersetGroup ?? 0)) + 1
+  return [mapExercise(d, key, (e) => ({ ...e, supersetGroup: group })), group, { ...anchor, supersetGroup: group }]
+}
+
+/** Insert an exercise right after the superset block of `key`. */
+function insertAfterBlock(exercises: DraftExercise[], key: string, ex: DraftExercise): DraftExercise[] {
+  const end = blockEnd(exercises, key)
+  return [...exercises.slice(0, end), ex, ...exercises.slice(end)]
+}
+
+/** Superset `key` with a newly added exercise (same set/rep targets as the anchor). */
+export function supersetWithNew(d: WorkoutDraft, key: string, ctx: ExerciseContext): WorkoutDraft {
+  const grouped = ensureGroup(d, key)
+  if (!grouped) return d
+  const [base, group, anchor] = grouped
+  const added = newExercise(
+    ctx,
+    { warmupSets: 0, sets: anchor.sets, repMin: anchor.repMin, repMax: anchor.repMax },
+    { supersetGroup: group, block: anchor.block },
+  )
+  return { ...base, exercises: insertAfterBlock(base.exercises, key, added) }
+}
+
+/** Superset `key` with an exercise already in the workout, moving it next to the block. */
+export function supersetWithExisting(d: WorkoutDraft, key: string, otherKey: string): WorkoutDraft {
+  const grouped = key === otherKey ? null : ensureGroup(d, key)
+  const other = d.exercises.find((e) => e.key === otherKey)
+  if (!grouped || !other) return d
+  const [base, group, anchor] = grouped
+  const moved = { ...other, supersetGroup: group, block: anchor.block }
+  const rest = base.exercises.filter((e) => e.key !== otherKey)
+  return normalizeGroups({ ...base, exercises: insertAfterBlock(rest, key, moved) })
+}
+
+/** Take an exercise out of its superset and place it right after the block. */
+export function unlinkSuperset(d: WorkoutDraft, key: string): WorkoutDraft {
+  const ex = d.exercises.find((e) => e.key === key)
+  if (!ex || ex.supersetGroup === null) return d
+  const end = blockEnd(d.exercises, key) - 1 // block end once `ex` is taken out
+  const rest = d.exercises.filter((e) => e.key !== key)
+  return normalizeGroups({ ...d, exercises: [...rest.slice(0, end), { ...ex, supersetGroup: null }, ...rest.slice(end)] })
+}
 
 /** Add a working set (copy of the last row) or an empty warm-up after the last warm-up. */
 export function addSet(d: WorkoutDraft, key: string, warmup = false): WorkoutDraft {
