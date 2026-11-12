@@ -128,7 +128,7 @@ def _muscles(workout: Workout, extra: float) -> list[MuscleVolume]:
     return [MuscleVolume(muscle=m, volume_kg=v) for m, v in ranked if v > 0]
 
 
-def _bodyweight_at(db: Session, workout: Workout) -> BodyweightAt:
+def bodyweight_at(db: Session, workout: Workout) -> BodyweightAt:
     """Bodyweight on a workout's day; skips loading entries when no bodyweight exercise is in it."""
     if not any(e.exercise.is_bodyweight for e in workout.exercises):
         return lambda _: 0
@@ -138,7 +138,7 @@ def _bodyweight_at(db: Session, workout: Workout) -> BodyweightAt:
 
 def workout_insights(db: Session, workout: Workout) -> WorkoutInsights:
     """Muscle volume and per-exercise comparison for a loaded workout."""
-    bodyweight = _bodyweight_at(db, workout)
+    bodyweight = bodyweight_at(db, workout)
     return WorkoutInsights(
         muscles=_muscles(workout, bodyweight(workout)),
         exercises=[_insight(db, workout, e, bodyweight) for e in workout.exercises],

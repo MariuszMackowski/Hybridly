@@ -80,6 +80,7 @@ class WorkoutOut(BaseModel):
     title: str | None
     note: str | None
     source: str
+    strava_activity_id: int | None = None
     exercises: list[WorkoutExerciseOut]
 
 

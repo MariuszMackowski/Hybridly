@@ -112,6 +112,7 @@ export interface WorkoutOut {
   title: string | null
   note: string | null
   source: string
+  strava_activity_id: number | null
   exercises: {
     exercise_id: number
     exercise_name: string
@@ -265,6 +266,19 @@ export interface UploadResult {
   status: 'created' | 'duplicate' | 'error'
   id: number | null
   detail: string | null
+}
+
+export interface StravaStatus {
+  has_credentials: boolean
+  connected: boolean
+  athlete_name: string | null
+  callback_domain: string
+}
+
+export interface StravaSendResult {
+  activity_id: number
+  action: 'updated' | 'created'
+  url: string
 }
 
 export interface CorosStatus {

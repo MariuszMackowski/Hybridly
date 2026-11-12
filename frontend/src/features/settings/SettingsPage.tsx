@@ -4,6 +4,7 @@ import { useBodyweight, useSaveBodyweight, useToday } from '../../api/hooks'
 import { parseDecimal } from '../../lib/decimal'
 import { kg } from '../../lib/format'
 import CorosCard from './CorosCard'
+import StravaCard from './StravaCard'
 
 export default function SettingsPage() {
   const today = useToday().data?.date ?? new Date().toISOString().slice(0, 10)
@@ -40,6 +41,8 @@ export default function SettingsPage() {
         </Link>
       </div>
       <CorosCard />
+      {params.get('strava') === 'connected' && <div className="card good">Strava connected.</div>}
+      <StravaCard error={params.get('strava_error')} />
       <div className="card stack">
         <strong>Bodyweight</strong>
         <span className="muted">Used for bodyweight exercises (pull-ups: logged kg = added weight).</span>

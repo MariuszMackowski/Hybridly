@@ -12,6 +12,8 @@ import type {
   HistoryKind,
   ActivityDetail,
   CorosStatus,
+  StravaSendResult,
+  StravaStatus,
   UploadResult,
   BodyweightEntry,
   ExerciseProgress,
@@ -171,6 +173,29 @@ export function useUploadFit() {
 
 export const useDeleteActivity = () =>
   useInvalidatingMutation((id: number) => apiSend<void>('DELETE', `/activities/${id}`), [['activities'], ['history']])
+
+export const useStravaStatus = () =>
+  useQuery({ queryKey: ['strava'], queryFn: () => apiGet<StravaStatus>('/strava/status') })
+
+export const useStravaCredentials = () =>
+  useInvalidatingMutation(
+    (body: { client_id: string; client_secret: string }) => apiSend<void>('PUT', '/strava/credentials', body),
+    [['strava']],
+  )
+
+export const useStravaConnect = () =>
+  useMutation({ mutationFn: () => apiSend<{ authorize_url: string }>('POST', '/strava/connect') })
+
+export const useStravaComplete = () =>
+  useInvalidatingMutation((url: string) => apiSend<{ status: string }>('POST', '/strava/complete', { url }), [['strava']])
+
+export const useStravaDisconnect = () =>
+  useInvalidatingMutation(() => apiSend<void>('POST', '/strava/disconnect'), [['strava']])
+
+export const useSendToStrava = (workoutId: number) =>
+  useInvalidatingMutation(() => apiSend<StravaSendResult>('POST', `/workouts/${workoutId}/strava`), [
+    ['workouts'],
+  ])
 
 export const useCorosStatus = () =>
   useQuery({

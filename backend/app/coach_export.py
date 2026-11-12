@@ -16,6 +16,7 @@ from app.plans.compare import compare
 from app.plans.models import PlanSession
 from app.plans.service import sessions_on, week_of
 from app.time import local_date, local_range, local_today
+from app.workouts.format import exercise_line, kg_text
 from app.workouts.models import Workout, WorkoutExercise
 
 router = APIRouter(tags=["export"])
@@ -43,21 +44,6 @@ def _clock(seconds: float) -> str:
     s = round(seconds)
     h, m, sec = s // 3600, s % 3600 // 60, s % 60
     return f"{h}:{m:02d}:{sec:02d}" if h else f"{m}:{sec:02d}"
-
-
-def _kg(value) -> str:
-    """Weight without trailing zeros."""
-    return f"{float(value):g}"
-
-
-def _set_text(s) -> str:
-    """'60×8', '60 kg · 45 s', '40 m'; warm-ups prefixed with W."""
-    if s.reps is not None:
-        text = f"{_kg(s.weight_kg or 0)}×{s.reps}"
-    else:
-        amount = f"{s.seconds} s" if s.seconds is not None else f"{s.distance_m:g} m"
-        text = f"{_kg(s.weight_kg)} kg · {amount}" if s.weight_kg else amount
-    return ("W " if s.is_warmup else "") + text + (" PR" if s.is_pr else "")
 
 
 def _workouts(db: Session, between) -> list[Workout]:
@@ -109,7 +95,7 @@ def _state_lines(db: Session, today: date) -> list[str]:
         lines.append(f"- Most fatigued muscles: {', '.join(tired[:4])}")
     weight = db.scalar(select(BodyweightEntry).order_by(BodyweightEntry.day.desc()).limit(1))
     if weight:
-        lines.append(f"- Bodyweight: {_kg(weight.kg)} kg ({weight.day:%d.%m.%Y})")
+        lines.append(f"- Bodyweight: {kg_text(weight.kg)} kg ({weight.day:%d.%m.%Y})")
     week = week_of(db, today)
     if week:
         goal = {k: v for k, v in (week.plan.goal or {}).items() if v is not None}
@@ -126,10 +112,7 @@ def _workout_block(workout: Workout, load: int | None) -> list[str]:
     title = workout.title or "Workout"
     head = f"### {_day(local_date(workout.started_at))} · {title}"
     lines = [head + (f" (load {load})" if load else "")]
-    for entry in workout.exercises:
-        name = entry.exercise.name + (f" ({entry.grip})" if entry.grip else "")
-        side = " per side" if entry.exercise.per_side else ""
-        lines.append(f"- {name}{side}: " + ", ".join(_set_text(s) for s in entry.sets))
+    lines += [f"- {exercise_line(entry)}" for entry in workout.exercises]
     return lines
 
 

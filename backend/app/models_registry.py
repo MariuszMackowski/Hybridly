@@ -6,6 +6,7 @@ from app.coros.models import CorosAccount, CorosDaily
 from app.exercises.models import Exercise
 from app.plans.models import PlanSession, PlanWeek, TrainingPlan
 from app.routines.models import Routine, RoutineLog, RoutineWeekday, Video
+from app.strava.models import StravaAccount
 from app.templates.models import TemplateSlot, WeeklyTemplate, WorkoutTemplate
 from app.workouts.models import Workout, WorkoutExercise, WorkoutSet
 
@@ -21,6 +22,7 @@ __all__ = [
     "Routine",
     "RoutineLog",
     "RoutineWeekday",
+    "StravaAccount",
     "TrainingPlan",
     "Video",
     "TemplateSlot",

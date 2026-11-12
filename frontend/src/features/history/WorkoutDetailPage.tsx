@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useDeleteWorkout, useWorkout, useWorkoutInsights } from '../../api/hooks'
 import { dateTime, durationMin, kg } from '../../lib/format'
+import SendToStrava from './SendToStrava'
 import { InsightSummary, MuscleVolumeCard, type InsightMode } from './WorkoutInsights'
 
 export default function WorkoutDetailPage() {
@@ -88,6 +89,7 @@ export default function WorkoutDetailPage() {
           </div>
         )
       })}
+      <SendToStrava workoutId={w.id} sentTo={w.strava_activity_id} />
       <button className="btn-danger btn-block" disabled={remove.isPending} onClick={onDelete}>
         Delete workout
       </button>

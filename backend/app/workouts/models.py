@@ -3,6 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import (
+    BigInteger,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -37,6 +38,7 @@ class Workout(Base):
     note: Mapped[str | None]
     source: Mapped[str] = mapped_column(String(10), default="app", server_default="app")
     external_id: Mapped[str | None]
+    strava_activity_id: Mapped[int | None] = mapped_column(BigInteger)
 
     template: Mapped[WorkoutTemplate | None] = relationship()
     exercises: Mapped[list["WorkoutExercise"]] = relationship(
