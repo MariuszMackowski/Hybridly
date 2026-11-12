@@ -61,11 +61,23 @@ Settings → **Connect COROS** uses the official COROS MCP server (OAuth with dy
 - If the app is reachable over HTTPS (e.g. `tailscale serve`), set `PUBLIC_URL` in `.env` and COROS redirects straight back to `/api/coros/callback`.
 - Otherwise the login ends on a `http://localhost:8765/callback?code=…` error page: paste that address into the box in Settings.
 
-Sync runs in the Celery worker: once whenever the stack starts and on **Sync now**. It imports every non-strength activity (FIT file + COROS training load / TE) and stores the daily recovery, training-load and fitness (VO2max, race predictor) snapshots. COROS allows 50 FIT downloads per day, so one run downloads at most 45; the rest follow on the next run. FIT files are kept in `data/fit/`. Runs can also be added by uploading `.fit` files on the Runs tab — the same activity from both sources is stored once.
+Sync runs in the Celery worker: once whenever the stack starts and on **Sync now**. It imports every non-strength activity (FIT file + COROS training load / TE) and stores the daily recovery, training-load and fitness (VO2max, race predictor) snapshots. COROS allows 50 FIT downloads per day, so one run downloads at most 45; the rest follow on the next run. FIT files are kept in `data/fit/`. Runs can also be added by uploading `.fit` files on the History tab — the same activity from both sources is stored once.
+
+## Workout logger
+
+- Start from a template (or empty) on **Today**; the workout is kept on the phone until **Save**. Each set shows the previous result and a **Suggested** weight × reps (double progression, step = the exercise's *increment kg*); tapping a field clears it for a new number.
+- **+ Add exercise** has a muscle filter and search. **⋯** on a card: **Replace** (template alternatives and exercises for the same muscles first; the new one takes the same spot), **Super set with…** (an exercise from this workout or a new one; sets alternate A1, B1, A2…) and **Unlink superset**.
+- Exercises can list **grips** (e.g. `V-grip, wide`, set in Settings → Exercises). The logger shows them as chips, remembers the last one and keeps Prev/Suggested and PRs separate per grip.
+
+## Progress
+
+- **History** → a workout: volume per muscle (primary muscles count fully, secondary half) and, per exercise, volume (total reps for bodyweight-only work) or best set, with the change against the session closest to 4 weeks earlier. Warm-ups are not counted.
+- Exercise page (**Progress** in Settings → Exercises, or tap an exercise in a workout): estimated 1RM and top set over time, weekly volume, a "to beat last time, try …" target, recent sessions, records (best e1RM, heaviest, biggest set, best session) and estimated maxes for 1–12 reps. Grip and range (3 months / 1 year / all) filters.
 
 ## Running plan & home routines
 
 - **Plan** tab → *Instructions for your AI coach*: copy the format description, send it to the coach, then import the YAML it returns (file or paste). CLI: `python -m app.cli import-plan /data/seed/<plan>.yaml`.
+- **Plan** tab → *Training summary for your AI coach*: pick a date range (default: last 4 weeks) and copy a text summary — current recovery, bodyweight and plan week, a weekly overview (gym sessions, working sets, run km vs. planned), every gym set, runs compared with the plan and missed planned runs.
 - A newer plan takes over from `max(its first week, today)`; earlier days keep the plan that was active then. Runs are matched to planned sessions automatically (same day, otherwise ±1 day if the distance is plausible) and compared: distance, pace vs. range, time in HR zone, interval laps.
 - **Today** shows the planned run, week progress, this week's daily load (gym + cardio, Mon–Sun, with the week total), coach notes, the strength template planned for the weekday (with a cutback/taper hint), the day's home routines to tick off and the recovery view.
 - Exercises are measured in reps, time (s) or distance (m), each with optional kg.
@@ -73,7 +85,7 @@ Sync runs in the Celery worker: once whenever the stack starts and on **Sync now
 
 ## Records
 
-**Records** tab: COROS race predictor (5 km – marathon, VO2max, threshold pace) and the fastest 100 m / 400 m / 1 km / 5 km / 10 km / half / marathon segment found in any run (computed from the 1 Hz FIT data, linked to the run). After a parser change run `python -m app.cli reparse-activities` to refill them.
+**Records** tab: COROS race predictor (5 km – marathon, VO2max, threshold pace), the bodyweight trend and the fastest 100 m / 400 m / 1 km / 5 km / 10 km / half / marathon segment found in any run (computed from the 1 Hz FIT data, linked to the run). After a parser change run `python -m app.cli reparse-activities` to refill them.
 
 ## Load & recovery
 
