@@ -2,6 +2,7 @@ from fastapi import APIRouter, FastAPI
 
 from app.activities.router import router as activities_router
 from app.bodyweight.router import router as bodyweight_router
+from app.coach_export import router as coach_export_router
 from app.config import get_settings
 from app.coros.router import router as coros_router
 from app.exercises.router import router as exercises_router
@@ -42,6 +43,7 @@ def create_app() -> FastAPI:
         routines_router,
         recovery_router,
         records_router,
+        coach_export_router,
     ):
         app.include_router(router, prefix="/api")
     return app

@@ -4,6 +4,8 @@ import { useActivePlan, useImportPlan, usePlanInstructions, useToday } from '../
 import type { PlanWeek } from '../../api/types'
 import { sessionStatus } from '../../lib/plan'
 import { targets } from './SessionCard'
+import CoachExportCard from './CoachExportCard'
+import CopyBox from '../../components/CopyBox'
 
 const STATUS_ICON = { done: '✓', missed: '✗', today: '•', upcoming: '' } as const
 const weekday = (iso: string) =>
@@ -97,17 +99,6 @@ function ImportPlan() {
 /** Copyable format description for the AI coach (textarea fallback on plain http). */
 function CoachInstructions() {
   const text = usePlanInstructions().data?.text ?? ''
-  const area = useRef<HTMLTextAreaElement>(null)
-  const [copied, setCopied] = useState(false)
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text)
-    } catch {
-      area.current?.select()
-      document.execCommand('copy')
-    }
-    setCopied(true)
-  }
   return (
     <details className="card">
       <summary>
@@ -115,8 +106,7 @@ function CoachInstructions() {
       </summary>
       <div className="stack">
         <span className="muted">Paste this to the coach so the plan comes back in a format Hybridly can import.</span>
-        <textarea ref={area} className="mono" readOnly value={text} onFocus={(e) => e.target.select()} />
-        <button onClick={copy}>{copied ? 'Copied ✓' : 'Copy'}</button>
+        <CopyBox text={text} />
       </div>
     </details>
   )
@@ -148,6 +138,7 @@ export default function PlanPage() {
       ))}
       <ImportPlan />
       <CoachInstructions />
+      <CoachExportCard today={today} />
     </div>
   )
 }

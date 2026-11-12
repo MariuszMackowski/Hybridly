@@ -147,6 +147,12 @@ export interface ExerciseProgress {
   weeks: { week_start: string; volume_kg: number; sets: number }[]
 }
 
+export interface CoachExport {
+  start: string
+  end: string
+  text: string
+}
+
 export interface BodyweightEntry {
   day: string
   kg: number

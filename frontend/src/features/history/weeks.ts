@@ -11,7 +11,7 @@ export function setCalendarTimezone(timeZone: string) {
 export const localDay = (iso: string) => localDayFormat.format(new Date(iso))
 
 /** Calendar arithmetic on "YYYY-MM-DD" strings (UTC noon avoids DST edges). */
-function shift(day: string, days: number): string {
+export function shift(day: string, days: number): string {
   const d = new Date(`${day}T12:00:00Z`)
   d.setUTCDate(d.getUTCDate() + days)
   return d.toISOString().slice(0, 10)
