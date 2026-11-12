@@ -26,3 +26,11 @@ export function robustDomain(values: Series): [number, number] | undefined {
 export function clampTo(values: Series, [lo, hi]: [number, number]): Series {
   return values.map((v) => (v === null ? null : Math.min(hi, Math.max(lo, v))))
 }
+
+/** Shared look of recharts axes and tooltips on the dark theme. */
+export const AXIS_PROPS = { stroke: '#8a90a0', fontSize: 10, tickLine: false } as const
+export const TOOLTIP_STYLE = { background: '#181b22', border: '1px solid #2a2f3a' } as const
+
+/** "YYYY-MM-DD" → "09.11" (or "09.11.25" when years differ across the chart). */
+export const shortDay = (day: string, withYear = false) =>
+  `${day.slice(8, 10)}.${day.slice(5, 7)}${withYear ? `.${day.slice(2, 4)}` : ''}`

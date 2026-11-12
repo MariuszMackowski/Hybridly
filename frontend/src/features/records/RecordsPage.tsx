@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useRecords } from '../../api/hooks'
 import { formatDuration, formatPace } from '../../lib/format'
+import BodyweightCard from '../progress/BodyweightCard'
 
 const LABELS: Record<string, string> = {
   '100m': '100 m',
@@ -77,6 +78,7 @@ export default function RecordsPage() {
           </tbody>
         </table>
       </div>
+      <BodyweightCard />
     </div>
   )
 }

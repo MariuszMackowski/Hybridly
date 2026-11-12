@@ -7,6 +7,7 @@ from app.exercises.models import Exercise
 from app.exercises.schemas import ExerciseIn, ExerciseOut
 from app.muscles import Muscle
 from app.progression.context import ExerciseContext, build_context
+from app.progression.progress import ExerciseProgress, exercise_progress
 
 router = APIRouter(tags=["exercises"])
 
@@ -67,6 +68,14 @@ def exercise_context(
     """Previous session and suggestions for the workout logger; grip defaults to the last used."""
     exercise = get_exercise_or_404(db, exercise_id)
     return build_context(db, exercise, sets, rep_min, max(rep_min, rep_max), grip)
+
+
+@router.get("/exercises/{exercise_id}/progress", response_model=ExerciseProgress)
+def exercise_progress_view(
+    exercise_id: int, grip: str | None = None, db: Session = Depends(get_db)
+):
+    """e1RM, top set and weekly volume over time for the progress charts."""
+    return exercise_progress(db, get_exercise_or_404(db, exercise_id), grip)
 
 
 @router.post("/exercises/{exercise_id}/archive", response_model=ExerciseOut)

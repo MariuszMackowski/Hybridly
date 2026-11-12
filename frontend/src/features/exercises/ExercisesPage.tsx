@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useArchiveExercise, useExercises } from '../../api/hooks'
 import type { ExerciseOut } from '../../api/types'
 import BackButton from '../../components/BackButton'
@@ -40,6 +41,9 @@ export default function ExercisesPage() {
               {[...e.primary_muscles, ...e.secondary_muscles].map((m) => m.replace('_', ' ')).join(', ') || 'no muscles set'}
             </span>
           </button>
+          <Link className="btn btn-small row" to={`/exercises/${e.id}/progress`}>
+            Progress
+          </Link>
           <button
             className="btn-small btn-danger"
             onClick={() => window.confirm(`Archive ${e.name}? History stays.`) && archive.mutate(e.id)}

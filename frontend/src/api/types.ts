@@ -133,6 +133,20 @@ export interface WorkoutSummary {
   pr_count: number
 }
 
+export interface ExerciseProgress {
+  grips: string[]
+  sessions: {
+    workout_id: number
+    started_at: string
+    grip: string | null
+    best_e1rm_kg: number | null
+    top_weight_kg: number
+    top_reps: number
+    volume_kg: number
+  }[]
+  weeks: { week_start: string; volume_kg: number; sets: number }[]
+}
+
 export interface BodyweightEntry {
   day: string
   kg: number

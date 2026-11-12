@@ -14,6 +14,7 @@ import type {
   CorosStatus,
   UploadResult,
   BodyweightEntry,
+  ExerciseProgress,
   ExerciseContext,
   ExerciseIn,
   ExerciseOut,
@@ -49,6 +50,13 @@ export const useMuscles = () =>
   useQuery({ queryKey: ['muscles'], queryFn: () => apiGet<string[]>('/muscles'), staleTime: Infinity })
 
 export const useWeek = () => useQuery({ queryKey: ['week'], queryFn: () => apiGet<WeekItem[]>('/week') })
+
+export const useExerciseProgress = (id: number, grip: string | null) =>
+  useQuery({
+    queryKey: ['workouts', 'progress', id, grip],
+    queryFn: () =>
+      apiGet<ExerciseProgress>(`/exercises/${id}/progress` + (grip ? `?grip=${encodeURIComponent(grip)}` : '')),
+  })
 
 export const useBodyweight = () =>
   useQuery({ queryKey: ['bodyweight'], queryFn: () => apiGet<BodyweightEntry[]>('/bodyweight') })

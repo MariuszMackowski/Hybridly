@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useDeleteWorkout, useWorkout } from '../../api/hooks'
 import { dateTime, durationMin, kg } from '../../lib/format'
 
@@ -37,8 +37,10 @@ export default function WorkoutDetailPage() {
         return (
           <div key={`${ex.exercise_id}-${i}`} className="card">
             <div className="row spread">
-              <strong>{ex.exercise_name}</strong>
-              {ex.grip && <span className="muted"> · {ex.grip}</span>}
+              <Link to={`/exercises/${ex.exercise_id}/progress`}>
+                <strong>{ex.exercise_name}</strong>
+                {ex.grip && <span className="muted"> · {ex.grip}</span>}
+              </Link>
               {ex.per_side && <span className="badge">per side</span>}
             </div>
             <table className="sets">

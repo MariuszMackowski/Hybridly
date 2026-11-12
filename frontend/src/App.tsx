@@ -13,6 +13,7 @@ import TemplateEditor from './features/templates/TemplateEditor'
 import TemplatesPage from './features/templates/TemplatesPage'
 import WeekPage from './features/templates/WeekPage'
 import TodayPage from './features/today/TodayPage'
+import ExerciseProgressPage from './features/progress/ExerciseProgressPage'
 
 const TABS = [
   { to: '/', label: 'Today' },
@@ -62,6 +63,7 @@ export default function App() {
         <Route path="/recovery" element={<RecoveryPage />} />
         <Route path="/records" element={<RecordsPage />} />
         <Route path="/exercises" element={<ExercisesPage />} />
+        <Route path="/exercises/:id/progress" element={<ExerciseProgressPage />} />
         <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/templates/:id" element={<TemplateEditor />} />
         <Route path="/week" element={<WeekPage />} />
