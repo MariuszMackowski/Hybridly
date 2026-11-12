@@ -17,8 +17,18 @@ CAPACITY_FACTOR = 3.0
 REGION_READY_LEVEL = 0.3  # a region counts as recovered once its most fatigued muscle is below this
 REGIONS = {
     "upper": (
-        "chest", "front_delts", "side_delts", "rear_delts", "lats", "upper_back", "biceps",
-        "triceps", "forearms", "abs", "obliques", "lower_back",
+        "chest",
+        "front_delts",
+        "side_delts",
+        "rear_delts",
+        "lats",
+        "upper_back",
+        "biceps",
+        "triceps",
+        "forearms",
+        "abs",
+        "obliques",
+        "lower_back",
     ),
     "lower": ("glutes", "quads", "hamstrings", "adductors", "abductors", "calves", "tibialis"),
 }
