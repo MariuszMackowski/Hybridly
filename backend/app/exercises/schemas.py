@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -17,7 +17,7 @@ class ExerciseIn(BaseModel):
     increment_kg: float = Field(default=2.5, ge=0)
     is_bodyweight: bool = False
     per_side: bool = False
-    grips: list[str] = []
+    grips: list[Annotated[str, Field(min_length=1, max_length=40)]] = []
     note: str | None = None
 
 

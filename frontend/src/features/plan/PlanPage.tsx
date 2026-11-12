@@ -138,7 +138,7 @@ export default function PlanPage() {
       ))}
       <ImportPlan />
       <CoachInstructions />
-      <CoachExportCard today={today} />
+      <CoachExportCard key={today} today={today} />
     </div>
   )
 }

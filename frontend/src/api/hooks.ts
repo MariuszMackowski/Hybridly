@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiGet, apiSend } from './client'
 import type {
   Records,
@@ -56,6 +56,7 @@ export const useExerciseProgress = (id: number, grip: string | null) =>
     queryKey: ['workouts', 'progress', id, grip],
     queryFn: () =>
       apiGet<ExerciseProgress>(`/exercises/${id}/progress` + (grip ? `?grip=${encodeURIComponent(grip)}` : '')),
+    placeholderData: keepPreviousData,
   })
 
 export const useBodyweight = () =>

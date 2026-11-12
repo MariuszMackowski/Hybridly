@@ -44,7 +44,7 @@ export default function ExerciseForm(props: { exercise: ExerciseOut | null; onDo
       ...form,
       increment_kg: parseDecimal(increment) ?? 0,
       load_factor: parseDecimal(loadFactor) ?? 1,
-      grips: grips.split(',').map((g) => g.trim()).filter(Boolean),
+      grips: [...new Set(grips.split(',').map((g) => g.trim()).filter(Boolean))],
     }
     save.mutate({ id: props.exercise?.id ?? null, body }, { onSuccess: props.onDone })
   }
@@ -101,7 +101,7 @@ export default function ExerciseForm(props: { exercise: ExerciseOut | null; onDo
       </label>
       <label>
         Grips (comma separated, e.g. V-grip, wide, neutral)
-        <input value={grips} onChange={(e) => setGrips(e.target.value)} />
+        <input value={grips} maxLength={400} onChange={(e) => setGrips(e.target.value)} />
       </label>
       <label>
         Note

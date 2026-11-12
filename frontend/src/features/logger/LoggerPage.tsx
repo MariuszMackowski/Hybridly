@@ -84,15 +84,16 @@ export default function LoggerPage() {
     onGrip: (exercise, grip) => void changeGrip(exercise, grip),
   }
 
-  /** Switch grip; before any set is logged, reload Prev/Suggested for that grip. */
+  /** Switch grip at once; reload Prev/Suggested for it unless sets got logged or the grip changed meanwhile. */
   async function changeGrip(ex: DraftExercise, grip: string) {
-    if (hasLoggedSets(ex)) {
-      update((d) => setGrip(d, ex.key, grip))
-      return
-    }
+    update((d) => setGrip(d, ex.key, grip))
+    if (hasLoggedSets(ex)) return
     try {
       const ctx = await fetchContext(ex.exerciseId, ex.sets, ex.repMin, ex.repMax, grip)
-      update((d) => swapExercise(d, ex.key, ctx))
+      update((d) => {
+        const current = d.exercises.find((e) => e.key === ex.key)
+        return current && current.grip === grip && !hasLoggedSets(current) ? swapExercise(d, ex.key, ctx) : d
+      })
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     }

@@ -22,6 +22,7 @@ router = APIRouter(tags=["export"])
 
 DEFAULT_DAYS = 28
 MAX_DAYS = 366
+FATIGUE_SHOWN = 0.05  # same cut-off as the Recovery card
 
 
 class CoachExport(BaseModel):
@@ -99,7 +100,11 @@ def _state_lines(db: Session, today: date) -> list[str]:
     lines = [f"- Recovery: {state.recovery_pct}% ({regions})"]
     if state.coros_pct is not None:
         lines.append(f"- COROS recovery: {state.coros_pct}%")
-    tired = [m.replace("_", " ") for m, v in sorted(state.muscles.items(), key=lambda x: -x[1])]
+    tired = [
+        m.replace("_", " ")
+        for m, v in sorted(state.muscles.items(), key=lambda x: -x[1])
+        if v >= FATIGUE_SHOWN
+    ]
     if tired:
         lines.append(f"- Most fatigued muscles: {', '.join(tired[:4])}")
     weight = db.scalar(select(BodyweightEntry).order_by(BodyweightEntry.day.desc()).limit(1))
@@ -107,7 +112,7 @@ def _state_lines(db: Session, today: date) -> list[str]:
         lines.append(f"- Bodyweight: {_kg(weight.kg)} kg ({weight.day:%d.%m.%Y})")
     week = week_of(db, today)
     if week:
-        goal = week.plan.goal or {}
+        goal = {k: v for k, v in (week.plan.goal or {}).items() if v is not None}
         target = f", target {week.target_km:g} km" if week.target_km else ""
         phase = week.phase or "-"
         lines.append(f"- Running plan: {week.plan.name}, week {week.week} ({phase}{target})")
@@ -196,11 +201,8 @@ def _week_table(workouts, activities, planned, start: date, end: date) -> list[s
 
 def _missed(planned: list[PlanSession], today: date) -> list[str]:
     """Past planned sessions with no matched activity."""
-    return [
-        f"- {_day(p.date)} · {p.title}"
-        for p in planned
-        if p.activity_id is None and p.date < today and p.type != "rest"
-    ]
+    missed = [p for p in planned if p.activity_id is None and p.date < today]
+    return [f"- {_day(p.date)} · {p.title}" for p in missed]
 
 
 def build_export(db: Session, start: date, end: date) -> str:
