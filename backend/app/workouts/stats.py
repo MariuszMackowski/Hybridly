@@ -26,9 +26,9 @@ def _set_e1rm(row: WorkoutSet, exercise: Exercise, bodyweight: float | None) -> 
 def recompute_stats(
     db: Session, exercise_ids: set[int] | None = None, bodyweight_only: bool = False
 ) -> None:
-    """Recompute e1RM and PR flags chronologically for the selected exercises."""
+    """Recompute e1RM and PR flags chronologically; PRs are tracked per exercise and grip."""
     query = (
-        select(WorkoutSet, WorkoutExercise.exercise_id, Workout.started_at)
+        select(WorkoutSet, WorkoutExercise.exercise_id, WorkoutExercise.grip, Workout.started_at)
         .join(WorkoutExercise, WorkoutSet.workout_exercise_id == WorkoutExercise.id)
         .join(Workout, WorkoutExercise.workout_id == Workout.id)
         .order_by(Workout.started_at, WorkoutExercise.position, WorkoutSet.set_index)
@@ -42,13 +42,13 @@ def recompute_stats(
     rows = db.execute(query).all()
     exercises = {e.id: e for e in db.scalars(select(Exercise))}
     bodyweight = bodyweight_lookup(db)
-    best: dict[int, Decimal] = defaultdict(lambda: Decimal("-1"))
-    for workout_set, exercise_id, started_at in rows:
+    best: dict[tuple[int, str | None], Decimal] = defaultdict(lambda: Decimal("-1"))
+    for workout_set, exercise_id, grip, started_at in rows:
         exercise = exercises[exercise_id]
         e1rm = _set_e1rm(workout_set, exercise, bodyweight(local_date(started_at)))
         workout_set.e1rm_kg = e1rm
-        previous_best = best[exercise_id]
+        previous_best = best[exercise_id, grip]
         workout_set.is_pr = e1rm is not None and previous_best >= 0 and e1rm > previous_best
         if e1rm is not None and e1rm > previous_best:
-            best[exercise_id] = e1rm
+            best[exercise_id, grip] = e1rm
     db.flush()

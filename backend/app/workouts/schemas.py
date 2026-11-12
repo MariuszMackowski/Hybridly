@@ -26,6 +26,7 @@ class WorkoutExerciseIn(BaseModel):
 
     exercise_id: int
     superset_group: int | None = None
+    grip: str | None = Field(default=None, max_length=40)
     sets: list[SetIn] = Field(min_length=1)
 
 
@@ -65,6 +66,7 @@ class WorkoutExerciseOut(BaseModel):
     exercise_name: str
     per_side: bool
     superset_group: int | None
+    grip: str | None
     sets: list[SetOut]
 
 

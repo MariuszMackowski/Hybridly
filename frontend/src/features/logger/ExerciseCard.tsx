@@ -8,6 +8,7 @@ export type CardActions = {
   onRemoveSet: (key: string, index: number) => void
   onAddSet: (key: string, warmup: boolean) => void
   onSwap: (exercise: DraftExercise) => void
+  onGrip: (exercise: DraftExercise, grip: string) => void
   onRemove: (key: string) => void
 }
 
@@ -44,6 +45,22 @@ export default function ExerciseCard(props: { group: DraftExercise[]; actions: C
           </span>
         </div>
       ))}
+      {group.map((ex) =>
+        ex.grips?.length ? (
+          <div key={`${ex.key}-grip`} className="chips grip-chips">
+            {group.length > 1 && <span className="muted">{ex.name}:</span>}
+            {ex.grips.map((g) => (
+              <button
+                key={g}
+                className={`chip${ex.grip === g ? ' on' : ''}`}
+                onClick={() => ex.grip !== g && actions.onGrip(ex, g)}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+        ) : null,
+      )}
       <div className="set-row set-head muted">
         <span>#</span>
         <span>Prev</span>

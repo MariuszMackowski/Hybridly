@@ -8,6 +8,7 @@ import {
   hasLoggedSets,
   removeExercise,
   removeSet,
+  setGrip,
   swapExercise,
   toggleChecklist,
   toggleDone,
@@ -80,6 +81,21 @@ export default function LoggerPage() {
       setPicker({ mode: 'swap', exercise })
     },
     onRemove: (key) => update((d) => removeExercise(d, key)),
+    onGrip: (exercise, grip) => void changeGrip(exercise, grip),
+  }
+
+  /** Switch grip; before any set is logged, reload Prev/Suggested for that grip. */
+  async function changeGrip(ex: DraftExercise, grip: string) {
+    if (hasLoggedSets(ex)) {
+      update((d) => setGrip(d, ex.key, grip))
+      return
+    }
+    try {
+      const ctx = await fetchContext(ex.exerciseId, ex.sets, ex.repMin, ex.repMax, grip)
+      update((d) => swapExercise(d, ex.key, ctx))
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    }
   }
 
   /** Load context for the picked exercise and swap or append it. */

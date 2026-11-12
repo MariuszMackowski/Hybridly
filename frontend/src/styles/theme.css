@@ -87,6 +87,7 @@ label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color:
 .badge-pr { background: var(--accent-soft); color: var(--accent); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { min-height: 32px; font-size: 13px; padding: 0 10px; border-radius: 16px; }
+.grip-chips { padding: 0 4px 4px; align-items: center; }
 .chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
 
 table.sets { width: 100%; border-collapse: collapse; font-size: 15px; }

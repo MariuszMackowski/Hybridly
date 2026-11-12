@@ -56,6 +56,7 @@ class WorkoutExercise(Base):
     position: Mapped[int]
     exercise_id: Mapped[int] = mapped_column(ForeignKey("exercise.id"), index=True)
     superset_group: Mapped[int | None]
+    grip: Mapped[str | None] = mapped_column(String(40))
 
     workout: Mapped[Workout] = relationship(back_populates="exercises")
     exercise: Mapped[Exercise] = relationship()

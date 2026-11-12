@@ -16,7 +16,7 @@ const NOW = new Date('2026-11-04T07:00:00Z')
 function exercise(id: number, name: string, extra: Partial<ExerciseOut> = {}): ExerciseOut {
   return {
     id, name, aliases: [], primary_muscles: ['chest'], secondary_muscles: [], measure: 'reps',
-    load_factor: 1, increment_kg: 2.5, is_bodyweight: false, per_side: false, note: null,
+    load_factor: 1, increment_kg: 2.5, is_bodyweight: false, per_side: false, grips: [], note: null,
     archived: false, ...extra,
   }
 }
@@ -38,6 +38,7 @@ function ctx(ex: ExerciseOut, prev: [number, number, boolean?][] = [],
              sugg: [number, number][] = []): ExerciseContext {
   return {
     exercise: ex,
+    grip: null,
     previous: prev.length
       ? { workout_id: 9, started_at: '2026-11-01T07:00:00Z',
           sets: prev.map(([w, r, wu]) => ({ weight_kg: w, reps: r, seconds: null, distance_m: null, is_warmup: !!wu })) }
@@ -136,7 +137,7 @@ describe('draft', () => {
     expect(payload.client_id).toBe('c1')
     expect(payload.template_id).toBe(1)
     expect(payload.exercises).toEqual([
-      { exercise_id: 1, superset_group: null,
+      { exercise_id: 1, superset_group: null, grip: null,
         sets: [{ weight_kg: 60, reps: 8, seconds: null, distance_m: null, is_warmup: false }] },
     ])
   })

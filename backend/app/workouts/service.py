@@ -55,6 +55,7 @@ def create_workout(db: Session, data: WorkoutCreate) -> tuple[Workout, bool]:
                 position=position,
                 exercise_id=entry.exercise_id,
                 superset_group=entry.superset_group,
+                grip=entry.grip,
                 sets=[WorkoutSet(set_index=i, **s.model_dump()) for i, s in enumerate(entry.sets)],
             )
         )
@@ -92,6 +93,7 @@ def to_out(workout: Workout) -> WorkoutOut:
                 exercise_name=e.exercise.name,
                 per_side=e.exercise.per_side,
                 superset_group=e.superset_group,
+                grip=e.grip,
                 sets=[SetOut.model_validate(s) for s in e.sets],
             )
             for e in workout.exercises

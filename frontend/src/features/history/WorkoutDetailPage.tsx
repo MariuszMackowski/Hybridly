@@ -38,6 +38,7 @@ export default function WorkoutDetailPage() {
           <div key={`${ex.exercise_id}-${i}`} className="card">
             <div className="row spread">
               <strong>{ex.exercise_name}</strong>
+              {ex.grip && <span className="muted"> · {ex.grip}</span>}
               {ex.per_side && <span className="badge">per side</span>}
             </div>
             <table className="sets">

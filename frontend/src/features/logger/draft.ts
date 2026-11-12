@@ -28,6 +28,9 @@ export type DraftExercise = {
   name: string
   measure: Measure
   perSide: boolean
+  /** Grip options and the chosen one; optional so older saved drafts still load. */
+  grips?: string[]
+  grip?: string | null
   alternatives: { id: number; name: string }[]
   warmupSets: number
   sets: number
@@ -92,6 +95,8 @@ export function withContext(ex: DraftExercise, ctx: ExerciseContext): DraftExerc
     name: ctx.exercise.name,
     measure: ctx.exercise.measure,
     perSide: ctx.exercise.per_side,
+    grips: ctx.exercise.grips,
+    grip: ctx.grip,
     rows: buildRows(ctx, ex),
   }
 }
@@ -150,6 +155,10 @@ export const hasLoggedSets = (ex: DraftExercise) => ex.rows.some((r) => r.done)
 
 export const swapExercise = (d: WorkoutDraft, key: string, ctx: ExerciseContext) =>
   mapExercise(d, key, (ex) => withContext(ex, ctx))
+
+/** Change only the grip label, keeping rows (used once sets are already logged). */
+export const setGrip = (d: WorkoutDraft, key: string, grip: string | null) =>
+  mapExercise(d, key, (ex) => ({ ...ex, grip }))
 
 export const addExercise = (d: WorkoutDraft, ctx: ExerciseContext): WorkoutDraft => ({
   ...d,
@@ -226,6 +235,7 @@ export function toPayload(d: WorkoutDraft, endedAt: Date): WorkoutCreate {
       .map((ex) => ({
         exercise_id: ex.exerciseId,
         superset_group: ex.supersetGroup,
+        grip: ex.grip ?? null,
         sets: ex.rows
           .filter((r) => isLoggable(ex, r))
           .map((r) => ({

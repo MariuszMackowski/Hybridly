@@ -17,6 +17,7 @@ class ExerciseIn(BaseModel):
     increment_kg: float = Field(default=2.5, ge=0)
     is_bodyweight: bool = False
     per_side: bool = False
+    grips: list[str] = []
     note: str | None = None
 
 

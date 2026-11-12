@@ -12,6 +12,7 @@ export interface ExerciseIn {
   increment_kg: number
   is_bodyweight: boolean
   per_side: boolean
+  grips: string[]
   note: string | null
 }
 
@@ -30,6 +31,7 @@ export interface PreviousSet {
 
 export interface ExerciseContext {
   exercise: ExerciseOut
+  grip: string | null
   previous: { workout_id: number; started_at: string; sets: PreviousSet[] } | null
   suggestions: { weight_kg: number; reps: number; kind: SuggestionKind; reason?: string | null }[]
 }
@@ -93,7 +95,7 @@ export interface WorkoutCreate {
   template_id: number | null
   title: string | null
   note: string | null
-  exercises: { exercise_id: number; superset_group: number | null; sets: SetIn[] }[]
+  exercises: { exercise_id: number; superset_group: number | null; grip: string | null; sets: SetIn[] }[]
 }
 
 export interface SetOut extends SetIn {
@@ -115,6 +117,7 @@ export interface WorkoutOut {
     exercise_name: string
     per_side: boolean
     superset_group: number | null
+    grip: string | null
     sets: SetOut[]
   }[]
 }

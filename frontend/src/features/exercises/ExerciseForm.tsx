@@ -5,7 +5,7 @@ import { parseDecimal } from '../../lib/decimal'
 
 const EMPTY: ExerciseIn = {
   name: '', aliases: [], primary_muscles: [], secondary_muscles: [], measure: 'reps', load_factor: 1,
-  increment_kg: 2.5, is_bodyweight: false, per_side: false, note: null,
+  increment_kg: 2.5, is_bodyweight: false, per_side: false, grips: [], note: null,
 }
 
 /** Toggleable chips for picking muscles. */
@@ -33,6 +33,7 @@ export default function ExerciseForm(props: { exercise: ExerciseOut | null; onDo
   const [form, setForm] = useState<ExerciseIn>(props.exercise ?? EMPTY)
   const [increment, setIncrement] = useState(String(form.increment_kg))
   const [loadFactor, setLoadFactor] = useState(String(form.load_factor))
+  const [grips, setGrips] = useState((form.grips ?? []).join(', '))
   const muscles = useMuscles().data ?? []
   const save = useSaveExercise()
   const set = <K extends keyof ExerciseIn>(key: K, value: ExerciseIn[K]) => setForm((f) => ({ ...f, [key]: value }))
@@ -43,6 +44,7 @@ export default function ExerciseForm(props: { exercise: ExerciseOut | null; onDo
       ...form,
       increment_kg: parseDecimal(increment) ?? 0,
       load_factor: parseDecimal(loadFactor) ?? 1,
+      grips: grips.split(',').map((g) => g.trim()).filter(Boolean),
     }
     save.mutate({ id: props.exercise?.id ?? null, body }, { onSuccess: props.onDone })
   }
@@ -96,6 +98,10 @@ export default function ExerciseForm(props: { exercise: ExerciseOut | null; onDo
           value={form.aliases.join(', ')}
           onChange={(e) => set('aliases', e.target.value.split(',').map((a) => a.trim()).filter(Boolean))}
         />
+      </label>
+      <label>
+        Grips (comma separated, e.g. V-grip, wide, neutral)
+        <input value={grips} onChange={(e) => setGrips(e.target.value)} />
       </label>
       <label>
         Note

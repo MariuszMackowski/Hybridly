@@ -72,16 +72,57 @@ class ExerciseContext(BaseModel):
     """Everything the logger needs to render one exercise card."""
 
     exercise: ExerciseOut
+    grip: str | None
     previous: PreviousSession | None
     suggestions: list[SuggestionOut]
 
 
-def _recent_entries(db: Session, exercise_id: int, limit: int) -> list[WorkoutExercise]:
-    """First occurrence of the exercise in each of its most recent workouts, newest first."""
+def _last_grip(db: Session, exercise: Exercise) -> str | None:
+    """Grip used the last time the exercise was logged with one of its current grips."""
+    return db.scalar(
+        select(WorkoutExercise.grip)
+        .join(Workout)
+        .where(
+            WorkoutExercise.exercise_id == exercise.id,
+            WorkoutExercise.grip.in_(exercise.grips),
+        )
+        .order_by(Workout.started_at.desc())
+        .limit(1)
+    )
+
+
+def resolve_grip(db: Session, exercise: Exercise, requested: str | None) -> str | None:
+    """Requested grip if the exercise offers it, otherwise the last used one."""
+    if not exercise.grips:
+        return None
+    if requested in exercise.grips:
+        return requested
+    return _last_grip(db, exercise)
+
+
+def _recent_entries(
+    db: Session, exercise_id: int, limit: int, grip: str | None = None
+) -> list[WorkoutExercise]:
+    """First occurrence of the exercise in each of its most recent workouts, newest first.
+
+    With a grip, only entries logged with it; if there are none yet, entries logged
+    without any grip (older history) stand in, so suggestions don't start from zero.
+    """
+    if grip is not None:
+        return _recent_entries_where(
+            db, exercise_id, limit, WorkoutExercise.grip == grip
+        ) or _recent_entries_where(db, exercise_id, limit, WorkoutExercise.grip.is_(None))
+    return _recent_entries_where(db, exercise_id, limit)
+
+
+def _recent_entries_where(
+    db: Session, exercise_id: int, limit: int, *conditions
+) -> list[WorkoutExercise]:
+    """Most recent entries of the exercise matching extra conditions, one per workout."""
     entries = db.scalars(
         select(WorkoutExercise)
         .join(Workout)
-        .where(WorkoutExercise.exercise_id == exercise_id)
+        .where(WorkoutExercise.exercise_id == exercise_id, *conditions)
         .order_by(Workout.started_at.desc(), WorkoutExercise.position)
         .options(selectinload(WorkoutExercise.sets), selectinload(WorkoutExercise.workout))
     )
@@ -105,10 +146,16 @@ def _working_sets(entry: WorkoutExercise | None) -> list[PrevSet]:
 
 
 def build_context(
-    db: Session, exercise: Exercise, sets: int, rep_min: int, rep_max: int
+    db: Session,
+    exercise: Exercise,
+    sets: int,
+    rep_min: int,
+    rep_max: int,
+    grip: str | None = None,
 ) -> ExerciseContext:
-    """Previous session plus double-progression suggestions for an exercise."""
-    recent = _recent_entries(db, exercise.id, limit=2)
+    """Previous session plus double-progression suggestions for an exercise (and grip)."""
+    grip = resolve_grip(db, exercise, grip)
+    recent = _recent_entries(db, exercise.id, limit=2, grip=grip)
     last = recent[0] if recent else None
     before = recent[1] if len(recent) > 1 else None
     suggestions = []
@@ -139,6 +186,7 @@ def build_context(
         )
     return ExerciseContext(
         exercise=ExerciseOut.model_validate(exercise),
+        grip=grip,
         previous=previous,
         suggestions=_hold_if_fatigued(db, exercise, suggestions, _working_sets(last)),
     )

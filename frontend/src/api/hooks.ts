@@ -65,10 +65,11 @@ export const useWorkouts = () =>
     getNextPageParam: (last, pages) => (last.length < PAGE_SIZE ? undefined : pages.length * PAGE_SIZE),
   })
 
-/** Fetch logger context for one exercise with the slot's targets. */
-export const fetchContext = (exerciseId: number, sets = 3, repMin = 8, repMax = 10) =>
+/** Fetch logger context for one exercise with the slot's targets (grip: last used when omitted). */
+export const fetchContext = (exerciseId: number, sets = 3, repMin = 8, repMax = 10, grip?: string | null) =>
   apiGet<ExerciseContext>(
-    `/exercises/${exerciseId}/context?sets=${sets}&rep_min=${repMin}&rep_max=${repMax}`,
+    `/exercises/${exerciseId}/context?sets=${sets}&rep_min=${repMin}&rep_max=${repMax}` +
+      (grip ? `&grip=${encodeURIComponent(grip)}` : ''),
   )
 
 /** Mutation helper that invalidates the given query keys on success. */

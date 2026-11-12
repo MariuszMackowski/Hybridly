@@ -28,5 +28,6 @@ class Exercise(Base):
     increment_kg: Mapped[float] = mapped_column(default=2.5, server_default="2.5")
     is_bodyweight: Mapped[bool] = mapped_column(default=False, server_default="false")
     per_side: Mapped[bool] = mapped_column(default=False, server_default="false")
+    grips: Mapped[list[str]] = mapped_column(ARRAY(String), default=list, server_default="{}")
     note: Mapped[str | None]
     archived: Mapped[bool] = mapped_column(default=False, server_default="false")

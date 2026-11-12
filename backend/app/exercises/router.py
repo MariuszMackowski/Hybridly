@@ -61,11 +61,12 @@ def exercise_context(
     sets: int = Query(3, ge=1, le=20),
     rep_min: int = Query(8, ge=1, le=100),
     rep_max: int = Query(10, ge=1, le=100),
+    grip: str | None = None,
     db: Session = Depends(get_db),
 ):
-    """Previous session and suggestions for the workout logger."""
+    """Previous session and suggestions for the workout logger; grip defaults to the last used."""
     exercise = get_exercise_or_404(db, exercise_id)
-    return build_context(db, exercise, sets, rep_min, max(rep_min, rep_max))
+    return build_context(db, exercise, sets, rep_min, max(rep_min, rep_max), grip)
 
 
 @router.post("/exercises/{exercise_id}/archive", response_model=ExerciseOut)
